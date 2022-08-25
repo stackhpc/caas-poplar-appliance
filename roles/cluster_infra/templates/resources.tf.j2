@@ -50,6 +50,37 @@ resource "openstack_blockstorage_volume_v3" "data_volume" {
 }
 
 #####
+##### Cluster networks
+#####
+
+data "openstack_networking_network_v2" "rnicnet" {
+  tags = [ "rnic" ]
+}
+
+data "openstack_networking_subnet_v2" "rnicsub" {
+  tags = [ "rnic" ]
+}
+
+resource "openstack_networking_port_v2" "rnic" {
+  name           = "${local.name}-rnic"
+  network_id     = data.openstack_networking_network_v2.rnicnet.id
+  admin_state_up = "true"
+  binding {
+    vnic_type = "direct"
+  }
+  fixed_ip {
+    subnet_id = data.openstack_networking_subnet_v2.rnicsub.id
+  }
+  port_security_enabled = "false"
+  # don't overrite os-vif adding chosen PCI device
+  lifecycle {
+    ignore_changes = [
+      binding,
+    ]
+  }
+}
+
+#####
 ##### Cluster nodes
 #####
 
@@ -69,9 +100,22 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     #cloud-config
     ssh_authorized_keys:
       - {{ cluster_user_ssh_public_key }}
+    mounts:
+      - [ ephemeral0, /localdata, auto, "defaults" ]
+    write_files:
+    - content: |
+        [Match]
+        MACAddress=${rnic_mac}
+        [Network]
+        DHCP=yes
+        [DHCPv4]
+        UseDNS=false
+    path: /etc/systemd/network/06-rnic.network
+    runcmd:
+      - [ systemctl, restart, systemd-networkd]
   EOF
 {% endif %}
-   
+
   metadata = {
     zenith_volume_id = "${openstack_blockstorage_volume_v3.zenith_volume.id}"
     data_volume_id = "${openstack_blockstorage_volume_v3.data_volume.id}"
@@ -88,6 +132,11 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     azimuth_project_name = "${data.openstack_identity_auth_scope_v3.scope.project_name}"
     azimuth_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
   }
+
+  network {
+    port = openstack_networking_port_v2.rnic.id
+  }
+
 }
 
 resource "openstack_compute_volume_attach_v2" "zenith_volume" {
