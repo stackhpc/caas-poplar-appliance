@@ -105,7 +105,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     write_files:
     - content: |
         [Match]
-        MACAddress=${rnic_mac}
+        MACAddress=${openstack_networking_port_v2.rnic.mac_address}
         [Network]
         DHCP=yes
         [DHCPv4]
