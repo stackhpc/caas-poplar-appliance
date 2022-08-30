@@ -62,7 +62,7 @@ data "openstack_networking_subnet_v2" "rnicsub" {
 }
 
 resource "openstack_networking_port_v2" "rnic" {
-  name           = "${local.name}-rnic"
+  name      = "{{ cluster_name }}-{{ cluster_type }}-rnic"
   network_id     = data.openstack_networking_network_v2.rnicnet.id
   admin_state_up = "true"
   binding {
