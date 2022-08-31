@@ -92,8 +92,13 @@ resource "openstack_compute_instance_v2" "cluster_server" {
 {% if cluster_user_ssh_public_key is defined and cluster_user_ssh_public_key %}
   user_data = <<-EOF
     #cloud-config
-    ssh_authorized_keys:
-      - {{ cluster_user_ssh_public_key }}
+    users:
+      - name: {{ user_name }}
+        gecos: {{ user_name }}
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        lock_passwd: true
+        ssh_authorized_keys:
+          - {{ cluster_user_ssh_public_key }}
     mounts:
       - [ ephemeral0, /localdata, auto, "defaults" ]
     write_files:

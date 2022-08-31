@@ -1,0 +1,18 @@
+---
+- block:
+    - name: Create a directory if it does not exist
+      ansible.builtin.file:
+        path: /etc/vipu
+        state: directory
+        mode: '0755'
+
+    - name: template out the vipu-cli.hcl file
+      ansible.builtin.template:
+        src: templates/vipu-cli.hcl.j2
+        dest: /etc/vipu/vipu-cli.hcl
+        owner: root
+        group: root
+        mode: 0644
+  when:
+    - vipu_port is defined
+    - vpod_name is defined
