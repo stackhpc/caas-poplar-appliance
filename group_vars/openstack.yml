@@ -15,3 +15,6 @@ terraform_binary_path: "{{ terraform_binary_directory }}/terraform"
 terraform_project_path: "{{ playbook_dir }}/terraform"
 
 terraform_state: "{{ cluster_state | default('present') }}"
+
+# The user that should be used to SSH to the cluster hosts
+cluster_ssh_user: ipuuser
