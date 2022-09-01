@@ -14,7 +14,7 @@ output "cluster_nodes" {
   value       = [
       {
         name          = "${openstack_compute_instance_v2.cluster_server.name}"
-        ip            = "${openstack_compute_instance_v2.cluster_server.network[0].fixed_ip_v4}"
+        ip            = "{{ cluster_floating_ip_address }}"
         groups        = ["instances"],
         facts  = {
           openstack_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
