@@ -52,13 +52,13 @@ parameters:
       min: 10
     immutable: true
 
-  - name: cluster_floating_ip
-    label: External IP for SSH access
-    description: |-
-      Attach an external IP to the workstation for access using SSH.
-    kind: cloud.ip
-    required: true
-    immutable: true
+#  - name: cluster_floating_ip
+#    label: External IP for SSH access
+#    description: |-
+#      Attach an external IP to the workstation for access using SSH.
+#    kind: cloud.ip
+#    required: true
+#    immutable: true
 
 
 usage_template: |-
