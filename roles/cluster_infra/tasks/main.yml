@@ -59,15 +59,15 @@
     - providers.tf
     - resources.tf
 
-#- name: Provision infrastructure
-#  community.general.terraform:
-#    binary_path: "{{ terraform_binary_path }}"
-#    project_path: "{{ terraform_project_path }}"
-#    state: "{{ terraform_state }}"
-#    backend_config: "{{ terraform_backend_config }}"
-#    force_init: yes
-#    init_reconfigure: yes
+- name: Provision infrastructure
+  community.general.terraform:
+    binary_path: "{{ terraform_binary_path }}"
+    project_path: "{{ terraform_project_path }}"
+    state: "{{ terraform_state }}"
+    backend_config: "{{ terraform_backend_config }}"
+    force_init: yes
+    init_reconfigure: yes
 
-- name: Provision infrastructure a la sample appliance
-  include_role:
-    name: stackhpc.terraform.infra
+#- name: Provision infrastructure a la sample appliance
+#  include_role:
+#    name: stackhpc.terraform.infra
