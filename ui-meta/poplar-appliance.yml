@@ -8,13 +8,13 @@ requires_ssh_key: true
 
 
 parameters:
-  - name: user_name
-    kind: string
-    label: User Name
-    description: Your username.
-    immutable: true
-    required: true
-    default: ubuntu
+#  - name: user_name
+#    kind: string
+#    label: User Name
+#    description: Your username.
+#    immutable: true
+#    required: true
+#    default: ubuntu
 
   - name: vipu_port
     kind: number
