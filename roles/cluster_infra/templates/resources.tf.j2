@@ -80,6 +80,10 @@ resource "openstack_networking_port_v2" "rnic" {
   }
 }
 
+resource "openstack_networking_floatingip_v2" "app-fip" {
+  pool = "external"
+}
+
 #####
 ##### Cluster nodes
 #####
@@ -96,6 +100,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
       - name: "${data.openstack_identity_auth_scope_v3.scope.user_name}"
         gecos: "${data.openstack_identity_auth_scope_v3.scope.user_name} ${data.openstack_identity_auth_scope_v3.scope.user_id} ${data.openstack_identity_auth_scope_v3.scope.project_name}"
         sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
         lock_passwd: true
         ssh_authorized_keys:
           - {{ cluster_user_ssh_public_key }}
@@ -149,13 +154,18 @@ resource "openstack_compute_volume_attach_v2" "data_volume" {
   volume_id   = "${openstack_blockstorage_volume_v3.data_volume.id}"
 }
 
-{% if cluster_floating_ip_address is defined and cluster_floating_ip_address %}
-#####
-##### Floating IP association
-#####
-
-resource "openstack_compute_floatingip_associate_v2" "cluster_floatingip_assoc" {
-  floating_ip = "{{ cluster_floating_ip_address }}"
+resource "openstack_compute_floatingip_associate_v2" "app-fip-assoc" {
+  floating_ip = "${openstack_networking_floatingip_v2.app-fip.address}"
   instance_id = "${openstack_compute_instance_v2.cluster_server.id}"
 }
-{% endif %}
+
+#{% if cluster_floating_ip_address is defined and cluster_floating_ip_address %}
+######
+###### Floating IP association
+######
+#
+#resource "openstack_compute_floatingip_associate_v2" "cluster_floatingip_assoc" {
+#  floating_ip = "{{ cluster_floating_ip_address }}"
+#  instance_id = "${openstack_compute_instance_v2.cluster_server.id}"
+#}
+#{% endif %}
