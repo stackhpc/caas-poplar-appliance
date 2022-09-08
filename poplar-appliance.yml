@@ -43,8 +43,8 @@
       when: (cluster_state | default('present')) == 'present'
       tags: never
 
-- name: Configure VIPU client
-  hosts: cluster
-  become: yes
-  roles:
-    - vipu_config
+#- name: Configure VIPU client
+#  hosts: cluster
+#  become: yes
+#  roles:
+#    - vipu_config
