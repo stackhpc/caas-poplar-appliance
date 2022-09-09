@@ -1,4 +1,21 @@
 ---
+- name: Populate inventory with VIPU server
+  hosts: localhost
+  tasks:
+    - name: Add to inventory
+      ansible.builtin.add_host:
+        name: vipu_ctrl
+        ansible_host: 10.129.110.13
+        ansible_user: ipuuser
+        groups: vipu_server
+
+- name: Configure vipu server
+  hosts: vipu_ctrl
+  tasks:
+    - name: Debug vipu server
+      ansible.builtin.debug:
+        var: ansible_facts
+      ignore_unreachable: yes
 
 - name: Provision infrastructure
   hosts: openstack
