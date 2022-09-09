@@ -1,6 +1,8 @@
 ---
 - name: Populate inventory with VIPU server
   hosts: localhost
+  vars:
+    terraform_state: "{{ cluster_state | default('present') }}"
   tasks:
     - name: Add to inventory
       ansible.builtin.add_host:
