@@ -17,6 +17,24 @@
         var: ansible_facts
       ignore_unreachable: yes
 
+    - name: Create allocation
+      ansible.builtin.command:
+        cmd: vipu-admin --showjson create allocation {{cluster.name}}-alloc --size {{allocation_size}} --reconfigurable
+      register: vipu_alloc_mk
+
+    - name: Debug vipu-admin output
+      ansible.builtin.debug:
+        var: vipu_alloc_mk
+
+    - name: List allocation
+      ansible.builtin.command:
+        cmd: vipu-admin --showjson list allocations
+      register: vipu_alloc_list
+
+    - name: Debug vipu-admin list
+      ansible.builtin.debug:
+        var: vipu_alloc_list
+
 - name: Provision infrastructure
   hosts: openstack
   roles:

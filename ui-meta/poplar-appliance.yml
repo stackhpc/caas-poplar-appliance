@@ -44,6 +44,17 @@ parameters:
       min: 10
     immutable: true
 
+  - name: allocation_size
+    label: "Number of IPUs in allocation (<64)"
+    description: |-
+      The number of IPUs to be added to allocation.
+    kind: integer
+    default: 16
+    options:
+      min: 4
+      max: 64
+    immutable: true
+
 #  - name: cluster_floating_ip
 #    label: External IP for SSH access
 #    description: |-
