@@ -19,7 +19,7 @@
 
     - name: Create allocation
       ansible.builtin.command:
-        cmd: vipu-admin --showjson create allocation {{cluster_name}}-alloc --size {{allocation_size}} --reconfigurable
+        cmd: vipu-admin --showjson create allocation {{cluster_name}}-alloc --size {{allocation_size}}
       register: vipu_alloc_mk
 
     - name: Debug vipu-admin output
