@@ -14,38 +14,54 @@
   vars:
     terraform_state: "{{ cluster_state | default('present') }}"
   tasks:
-    - name: Debug vipu server
-      ansible.builtin.debug:
-        var: ansible_facts
-      ignore_unreachable: yes
+    - name: Block for allocation configuration
+      block:
+        - name: Debug vipu server
+          ansible.builtin.debug:
+            var: ansible_facts
+          ignore_unreachable: yes
+
+        - name: Can we get an allocation of requested size?
+          ansible.builtin.command:
+            cmd: vipu-admin --showjson create allocation --options --size {{allocation_size}}
+          ignore_errors: yes
+          register: vipu_alloc_opt
+
+        - name: Debug allocation test
+          ansible.builtin.debug:
+            var: vipu_alloc_opt
+
+        - name: Do we have any options
+          ansible.builtin.fail:
+            msg: No allocations of size {{allocation_size}} available
+          when:
+            - vipu_alloc_opt.rc != 0
+            - '"no free allocation" in vipu_alloc_opt.stdout'
+
+        - name: Create allocation
+          ansible.builtin.command:
+            cmd: vipu-admin --showjson create allocation {{cluster_name}}-alloc --size {{allocation_size}}
+          register: vipu_alloc_mk
+
+        - name: Debug vipu-admin output
+          ansible.builtin.debug:
+            var: vipu_alloc_mk
+          when:
+            - vipu_alloc_mk is defined
+
+        - name: List allocation
+          ansible.builtin.command:
+            cmd: vipu-admin --showjson list allocations
+          register: vipu_alloc_list
+
+        - name: Debug vipu-admin list
+          ansible.builtin.debug:
+            var: vipu_alloc_list
+          when:
+            - vipu_alloc_list is defined
       when:
         - terraform_state == "present"
-
-    - name: Create allocation
-      ansible.builtin.command:
-        cmd: vipu-admin --showjson create allocation {{cluster_name}}-alloc --size {{allocation_size}}
-      register: vipu_alloc_mk
-      when:
-        - terraform_state == "present"
-
-    - name: Debug vipu-admin output
-      ansible.builtin.debug:
-        var: vipu_alloc_mk
-      when:
-        - vipu_alloc_mk is defined
-
-    - name: List allocation
-      ansible.builtin.command:
-        cmd: vipu-admin --showjson list allocations
-      register: vipu_alloc_list
-      when:
-        - terraform_state == "present"
-
-    - name: Debug vipu-admin list
-      ansible.builtin.debug:
-        var: vipu_alloc_list
-      when:
-        - vipu_alloc_list is defined
+      # End block
 
 - name: Provision infrastructure
   hosts: openstack
