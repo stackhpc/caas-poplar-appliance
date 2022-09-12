@@ -16,13 +16,13 @@ parameters:
     required: true
     default: 8090
 
-  - name: vpod_name
+  - name: vipu_ipaddr
     kind: string
-    label: VIPU Server Name
-    description: Short name for the VIPU server.
+    label: VIPU Server IP address
+    description: IP address for the VIPU server
     immutable: true
     required: true
-    default: vpod-ctrl
+    default: 10.129.110.13
 
   - name: cluster_flavor
     kind: cloud.size

@@ -38,9 +38,13 @@
             - vipu_alloc_opt.rc != 0
             - '"no free allocation" in vipu_alloc_opt.stdout'
 
+        - name: Set fact with allocation name
+          ansible.builtin.set_fact:
+            allocation_name: {{cluster_name}}-alloc
+
         - name: Create allocation
           ansible.builtin.command:
-            cmd: vipu-admin --showjson create allocation {{cluster_name}}-alloc --size {{allocation_size}}
+            cmd: vipu-admin --showjson create allocation {{allocation_name}}-alloc --size {{allocation_size}}
           register: vipu_alloc_mk
 
         - name: Debug vipu-admin output
@@ -67,6 +71,8 @@
   hosts: openstack
   roles:
     - cluster_infra
+  vars:
+    allocation_name: hostvars['vipu_ctrl']['allocation_name']
   post_tasks:
     - name: Wait for Monitoring to become available
       uri:
