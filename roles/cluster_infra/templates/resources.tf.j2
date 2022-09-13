@@ -139,7 +139,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     appliance_pub_ip = "${openstack_networking_floatingip_v2.app-fip.address}"
     allocation_name = "{{ allocation_name }}"
     allocation_size = "{{ allocation_size }}"
-    vipu_ipaddr     = "{{ vipu_ipaddr }"
+    vipu_ipaddr     = "{{ vipu_ipaddr }}"
     vipu_port       = "{{ vipu_port }}"
   }
 
