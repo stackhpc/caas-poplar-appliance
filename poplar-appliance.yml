@@ -72,7 +72,7 @@
   roles:
     - cluster_infra
   vars:
-    allocation_name: hostvars['vipu_ctrl']['allocation_name']
+    allocation_name: "{{hostvars['vipu_ctrl']['allocation_name']}}"
   post_tasks:
     - name: Wait for Monitoring to become available
       uri:
