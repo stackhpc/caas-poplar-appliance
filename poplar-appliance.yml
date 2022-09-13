@@ -40,7 +40,7 @@
 
         - name: Set fact with allocation name
           ansible.builtin.set_fact:
-            allocation_name: {{cluster_name}}-alloc
+            allocation_name: "{{cluster_name}}-alloc"
 
         - name: Create allocation
           ansible.builtin.command:
