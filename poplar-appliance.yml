@@ -2,14 +2,27 @@
 - name: Populate inventory with VIPU server
   hosts: localhost
   tasks:
+    - name: Get openstack user name
+      ansible.builtin.command:
+        cmd:  openstack user show "$(openstack token issue -f value -c user_id)" -f value -c name
+      register: openstack_cli_out
+
+    - name: Debug openstack cli
+      ansible.builtin.debug:
+        var: openstack_cli_out
+
+    - name: Set user name
+      ansible.builtin.set_fact:
+        appliance_user: "{{ openstack_cli_out.stdout | default( 'ipuuser') }}"
+
     - name: Add to inventory
       ansible.builtin.add_host:
         name: vipu_ctrl
         ansible_host: 10.129.110.13
         ansible_user: ipuuser
         groups: vipu_server
-        allocation_name: "{{cluster_name}}-alloc"
-
+        allocation_name: "{{appliance_user}}-alloc"
+        appliance_user: "{{ appliance_user }}"
 
 - name: Configure vipu server
   hosts: vipu_ctrl
