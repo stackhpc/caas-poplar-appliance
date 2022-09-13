@@ -9,7 +9,7 @@ requires_ssh_key: true
 
 parameters:
   - name: vipu_port
-    kind: number
+    kind: integer
     label: VIPU Port
     description: Port for VIPU server communication.
     immutable: true
