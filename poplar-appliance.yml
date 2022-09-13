@@ -8,6 +8,8 @@
         ansible_host: 10.129.110.13
         ansible_user: ipuuser
         groups: vipu_server
+        allocation_name: "{{cluster_name}}-alloc"
+
 
 - name: Configure vipu server
   hosts: vipu_ctrl
@@ -37,10 +39,6 @@
           when:
             - vipu_alloc_opt.rc != 0
             - '"no free allocation" in vipu_alloc_opt.stdout'
-
-        - name: Set fact with allocation name
-          ansible.builtin.set_fact:
-            allocation_name: "{{cluster_name}}-alloc"
 
         - name: Create allocation
           ansible.builtin.command:
