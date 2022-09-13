@@ -7,7 +7,7 @@
         name: python-openstackclient
 
     - name: Get openstack user name
-      ansible.builtin.command:
+      ansible.builtin.shell:
         cmd:  /home/runner/.local/bin/openstack user show "$(openstack token issue -f value -c user_id)" -f value -c name
       register: openstack_cli_out
 
