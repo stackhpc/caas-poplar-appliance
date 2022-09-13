@@ -2,6 +2,10 @@
 - name: Populate inventory with VIPU server
   hosts: localhost
   tasks:
+    - name: Install openstack cli
+      ansible.builtin.pip:
+        name: python-openstackclient
+
     - name: Get openstack user name
       ansible.builtin.command:
         cmd:  openstack user show "$(openstack token issue -f value -c user_id)" -f value -c name
