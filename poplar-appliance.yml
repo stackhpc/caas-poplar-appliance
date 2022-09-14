@@ -86,6 +86,13 @@
       when: (cluster_state | default('present')) == 'present'
       tags: never
 
+
+- hosts: localhost
+  tasks:
+    - name: debug inventory
+      debug:
+        msg: "{{ hostvars[groups['openstack']] }}"
+
 # Write the outputs as the final task
 - hosts: localhost
   tasks:
