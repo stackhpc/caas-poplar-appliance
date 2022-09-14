@@ -10,6 +10,9 @@
       ansible.builtin.shell:
         cmd:  /home/runner/.local/bin/openstack user show "$(/home/runner/.local/bin/openstack token issue -f value -c user_id)" -f value -c name
       register: openstack_cli_out
+      # Can we do something here with the "environment" property to set a PATH
+      # that includes /home/runner/.local/bin. Or, even better determine the
+      # install location and add that to PATH
 
     - name: Debug openstack cli
       ansible.builtin.debug:
@@ -25,62 +28,18 @@
         ansible_host: 10.129.110.13
         ansible_user: ipuuser
         groups: vipu_server
-        allocation_name: "{{appliance_user}}-alloc"
+        allocation_name: "{{appliance_user}}-{{cluster_name}}"
         appliance_user: "{{ appliance_user }}"
 
-- name: Configure vipu server
+- name: (De-)Configure vipu server
   hosts: vipu_ctrl
   vars:
     terraform_state: "{{ cluster_state | default('present') }}"
   tasks:
-    - name: Block for allocation configuration
-      block:
-        - name: Debug vipu server
-          ansible.builtin.debug:
-            var: ansible_facts
-          ignore_unreachable: yes
-
-        - name: Can we get an allocation of requested size?
-          ansible.builtin.command:
-            cmd: vipu-admin --showjson create allocation --options --size {{allocation_size}}
-          ignore_errors: yes
-          register: vipu_alloc_opt
-
-        - name: Debug allocation test
-          ansible.builtin.debug:
-            var: vipu_alloc_opt
-
-        - name: Do we have any options
-          ansible.builtin.fail:
-            msg: No allocations of size {{allocation_size}} available
-          when:
-            - vipu_alloc_opt.rc != 0
-            - '"no free allocation" in vipu_alloc_opt.stdout'
-
-        - name: Create allocation
-          ansible.builtin.command:
-            cmd: vipu-admin --showjson create allocation {{allocation_name}} --size {{allocation_size}}
-          register: vipu_alloc_mk
-
-        - name: Debug vipu-admin output
-          ansible.builtin.debug:
-            var: vipu_alloc_mk
-          when:
-            - vipu_alloc_mk is defined
-
-        - name: List allocation
-          ansible.builtin.command:
-            cmd: vipu-admin --showjson list allocations
-          register: vipu_alloc_list
-
-        - name: Debug vipu-admin list
-          ansible.builtin.debug:
-            var: vipu_alloc_list
-          when:
-            - vipu_alloc_list is defined
-      when:
-        - terraform_state == "present"
-      # End block
+    - name: Include poplar infra role
+      ansible.builtin.include_role:
+        name: poplar_infra
+        tasks_from: "{{ terraform_state }}.yml"
 
 - name: Provision infrastructure
   hosts: openstack

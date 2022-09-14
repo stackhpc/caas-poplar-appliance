@@ -1,0 +1,53 @@
+---
+# This task list deconfigures user-created partitions, and the Azimuth-created
+# allocations when the Poplar Appliance is torn down (terraform_state ==
+# absent)
+
+- name: Debug vipu server
+  ansible.builtin.debug:
+    var: ansible_facts
+  ignore_unreachable: yes
+
+- name: List partitions in our allocation (only)
+  ansible.builtin.command:
+    cmd: vipu-admin list partitions --allocation {{allocation_name}} --showjson
+  register: vipu_partition_list
+
+- name: Decode returned JSON
+  set_fact:
+    vipu_partition_json: "{{ vipu_partition_list.stdout | from_json }}"
+
+- name: Debug partitions in our allocation
+  ansible.builtin.debug:
+    var: item
+  loop: "{{ vipu_partition_json | community.general.json_query('partitions[*].id') }}"
+
+  # Assuming this loop won't run if there aren't any partitions in the returned
+  # json, which would look like:
+  #
+  # {
+  #   "partitions":  []
+  # }
+  #
+  # But we might want to test for the number of partitions and not execute if
+  # it is 0?
+- name: Remove partitions in our allocation
+  ansible.builtin.command:
+    cmd: vipu-admin remove partition {{ item }} --force
+  loop: "{{ vipu_partition_json | community.general.json_query('partitions[*].id') }}"
+  register: partition_remove_out
+
+  # Should really test that the partitions were removed
+  # If there were multiple partitions, partition_remove_out will contain
+  # a list(?) of outputs, one per partition. Each of those should have an rc
+  # value, and a stdout containing:
+  #
+  # ipuuser@cl2-pod001-1-ctrl:~$ vipu-admin remove partition jameso-4
+  # Please be patient. This operation can take several seconds
+  # ............
+  # remove partition (jameso-4): success.
+
+- name: Remove allocation
+  ansible.builtin.command:
+    cmd: vipu-admin remove allocation {{ allocation_name }}
+  register: allocation_remove_out
