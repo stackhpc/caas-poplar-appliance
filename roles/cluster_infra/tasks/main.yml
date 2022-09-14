@@ -67,6 +67,12 @@
     backend_config: "{{ terraform_backend_config }}"
     force_init: yes
     init_reconfigure: yes
+  register: terraform_provision
+
+- name: Populate in-memory inventory with facts from Terraform outputs
+  set_fact:
+    cluster_access_ip: "{{ terraform_provision.outputs.cluster_access_ip.value }}"
+    cluster_user: "{{ terraform_provision.outputs.cluster_user.value }}"
 
 #- name: Provision infrastructure a la sample appliance
 #  include_role:
