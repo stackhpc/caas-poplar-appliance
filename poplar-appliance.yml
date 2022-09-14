@@ -92,4 +92,5 @@
     - debug: var=outputs
       vars:
         outputs:
-          cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_gateway_ip }}"
+          cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_access_ip }}"
+          cluster_user: "{{ hostvars[groups['openstack'][0]].cluster_user }}"

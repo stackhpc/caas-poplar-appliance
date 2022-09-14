@@ -72,8 +72,8 @@ usage_template: |-
   The SSH key of the user that deployed the workstation is injected into a user account with the same name:
 
   ```
-  $ ssh ubuntu@{{ cluster.outputs.cluster_access_ip | default("[cluster ip]") }}
-  ubuntu@{{ cluster.name }}-workstation:~$
+  $ ssh {{ cluster.outputs.cluster_user | default("ubuntu") }}@{{ cluster.outputs.cluster_access_ip | default("[cluster ip]") }}
+  {{ cluster.outputs.cluster_user | default("ubuntu")}}@{{ cluster.name }}:~$
   ```
 
   The data volume is mounted at `/data`, and content stored there will persist for the lifetime
