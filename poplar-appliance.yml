@@ -85,3 +85,11 @@
       until: webconsole_uri.status not in [404, 503, -1]
       when: (cluster_state | default('present')) == 'present'
       tags: never
+
+# Write the outputs as the final task
+- hosts: localhost
+  tasks:
+    - debug: var=outputs
+      vars:
+        outputs:
+          cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_gateway_ip }}"
