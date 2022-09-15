@@ -47,6 +47,7 @@
     - cluster_infra
   vars:
     allocation_name: "{{hostvars['vipu_ctrl']['allocation_name']}}"
+    partition_name: "{{hostvars['vipu_ctrl']['partition_name']}}"
   post_tasks:
     - name: Wait for Monitoring to become available
       uri:

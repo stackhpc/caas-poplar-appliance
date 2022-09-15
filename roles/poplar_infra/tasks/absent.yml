@@ -51,8 +51,16 @@
     cmd: vipu-admin --showjson list allocations
   register: vipu_alloc_list
 
+- name: Decode returned JSON
+  set_fact:
+    vipu_alloc_json: "{{ vipu_alloc_list.stdout | from_json }}"
+
+- name: Debug allocation list
+  ansible.builtin.debug:
+    msg: "Clean up allocation list: {{vipu_alloc_json}}"
+
 - name: Remove allocation
   ansible.builtin.command:
     cmd: vipu-admin remove allocation {{ allocation_name }}
   register: allocation_remove_out
-  when: '"{{allocation_name}} in vipu_alloc_list.stdout'
+  when: '"{{allocation_name}} in vipu_alloc_json'
