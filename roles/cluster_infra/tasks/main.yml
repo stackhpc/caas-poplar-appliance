@@ -73,6 +73,8 @@
   set_fact:
     cluster_access_ip: "{{ terraform_provision.outputs.cluster_access_ip.value }}"
     cluster_user: "{{ terraform_provision.outputs.cluster_user.value }}"
+  when:
+    - terraform_state == present
 
 #- name: Provision infrastructure a la sample appliance
 #  include_role:
