@@ -63,4 +63,4 @@
   ansible.builtin.command:
     cmd: vipu-admin remove allocation {{ allocation_name }}
   register: allocation_remove_out
-  when: 'allocation_name in vipu_alloc_json'
+  when: vipu_alloc_json.allocations | json_query('[?contains(id, `' + allocation_name + '`)]') | length > 0
