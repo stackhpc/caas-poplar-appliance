@@ -55,6 +55,17 @@ parameters:
       max: 64
     immutable: true
 
+  - name: partition_choice
+    label: "Create a partition in the allocation, or not?"
+    description: |-
+      Choose whether to create a reconfigurable partition
+    kind: choice
+    default: "No partion required"
+    options:
+      choices:
+        - "No partion required"
+        - "Single reconfigurable partition"
+
 #  - name: cluster_floating_ip
 #    label: External IP for SSH access
 #    description: |-
