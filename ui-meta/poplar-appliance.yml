@@ -65,6 +65,7 @@ parameters:
       choices:
         - "No partion required"
         - "Single reconfigurable partition"
+    immutable: true
 
 #  - name: cluster_floating_ip
 #    label: External IP for SSH access
