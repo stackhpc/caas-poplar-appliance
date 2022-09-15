@@ -46,8 +46,13 @@
   # Please be patient. This operation can take several seconds
   # ............
   # remove partition (jameso-4): success.
+- name: List allocation
+  ansible.builtin.command:
+    cmd: vipu-admin --showjson list allocations
+  register: vipu_alloc_list
 
 - name: Remove allocation
   ansible.builtin.command:
     cmd: vipu-admin remove allocation {{ allocation_name }}
   register: allocation_remove_out
+  when: '"{{allocation_name}} in vipu_alloc_list.stdout'
