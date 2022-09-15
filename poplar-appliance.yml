@@ -8,7 +8,7 @@
 
     - name: Get openstack user name
       ansible.builtin.shell:
-        cmd:  /home/runner/.local/bin/openstack user show "$(/home/runner/.local/bin/openstack token issue -f value -c user_id)" -f value -c name
+        cmd: /home/runner/.local/bin/openstack user show "$(/home/runner/.local/bin/openstack token issue -f value -c user_id)" -f value -c name
       register: openstack_cli_out
       # Can we do something here with the "environment" property to set a PATH
       # that includes /home/runner/.local/bin. Or, even better determine the

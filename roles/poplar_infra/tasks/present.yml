@@ -42,3 +42,23 @@
     var: vipu_alloc_list
   when:
     - vipu_alloc_list is defined
+
+- name: Create partition if user requested
+  block:
+    - name: Create partition name
+      ansible.builtin.set_fact:
+        partition_name: "{{allocation_name}}-reconfig"
+
+    - name: Create partition
+      ansible.builtin.command:
+        cmd: vipu-admin --showjson create partition {{partition_name}} --size {{allocation_size}} --allocation {{allocation_name}} --reconfigurable
+      register: vipu_part_mk
+      ignore_errors: yes
+
+    - name: Did we create the requested partition?
+      ansible.builtin.fail:
+        msg: Creating reconfigurable partition size {{allocation_size}} in {{allocation_name}}
+      when:
+        - vipu_alloc_mk.rc != 0
+  when:
+    - '"Single reconfigurable partition" in partition_choice'
