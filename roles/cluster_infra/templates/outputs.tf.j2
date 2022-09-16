@@ -6,7 +6,7 @@ output "cluster_image" {
 
 output "cluster_flavour_name" {
   description = "The name of the flavour to present to the user"
-  value       = "${openstack_compute_instance_v2.cluster_server.flavour_name}"
+  value       = "${openstack_compute_instance_v2.cluster_server.flavor_name}"
 }
 
 output "cluster_access_ip" {
