@@ -4,6 +4,11 @@ output "cluster_image" {
   value       = "{{ cluster_previous_image | default(cluster_image) }}"
 }
 
+output "cluster_flavour_name" {
+  description = "The name of the flavour to present to the user"
+  value       = "${openstack_compute_instance_v2.cluster_server.flavour_name}"
+}
+
 output "cluster_access_ip" {
   description = "The floating IP associated with the appliance"
   value       = "${openstack_networking_floatingip_v2.app-fip.address}"

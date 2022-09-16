@@ -33,8 +33,8 @@ parameters:
 
   - name: cluster_flavor
     kind: cloud.size
-    label: Workstation Size
-    description: The size of the workstation.
+    label: Appliance Size
+    description: The size of the appliance.
     immutable: true
     options:
       min_ram: 4096
@@ -43,7 +43,7 @@ parameters:
   - name: cluster_volume_size
     label: "Data volume size (GB)"
     description: |-
-      The size of the data volume for the workstation.
+      The size of the data volume for the appliance.
       The data volume will be available at `/data`.
     kind: integer
     default: 10
@@ -70,7 +70,7 @@ parameters:
 usage_template: |-
   {% set webconsole = cluster | service("webconsole") %}
   {% set monitoring = cluster | service("monitoring") %}
-  This Poplar appliance may be accessed in a web browser via the [Web console service]({{ webconsole.url }}) and by SSH.  The SSH key of the user that deployed the appliance is injected into a user account with the same name.
+  This Poplar appliance (size {{cluster.outputs.cluster_flavour_name}}) may be accessed in a web browser via the [Web console service]({{ webconsole.url }}) and by SSH.  The SSH key of the user that deployed the appliance is injected into a user account with the same name.
 
   SSH access example:
 
@@ -84,9 +84,9 @@ usage_template: |-
   ```
   GC_ALLOCATION_NAME={{cluster.outputs.allocation_name}}
   GC_ALLOCATION_SIZE={{cluster.outputs.allocation_size}}
-  GC_PUBLIC_IP={{cluster.outputs.cluster.outputs.cluster_access_ip | default("[cluster ip]") }}
-  IPUOF_VIPU_API_PARTITION_ID={{cluster.outputs.cluster.outputs.ipuof_vipu_api_partition_id}}
-  IPUOF_VIPU_API_HOST={{cluster.outputs.cluster.outputs.ipuof_vipu_api_host}}
+  GC_PUBLIC_IP={{cluster.outputs.cluster_access_ip | default("[cluster ip]") }}
+  IPUOF_VIPU_API_PARTITION_ID={{cluster.outputs.ipuof_vipu_api_partition_id}}
+  IPUOF_VIPU_API_HOST={{cluster.outputs.ipuof_vipu_api_host}}
   ```
 
   A data volume is mounted at `/data`, and content stored there will persist for the lifetime
