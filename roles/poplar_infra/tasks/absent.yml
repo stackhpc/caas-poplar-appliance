@@ -8,6 +8,9 @@
     var: ansible_facts
   ignore_unreachable: yes
 
+  # This is flakey, if allocation_name isn't known it throws an error so we
+  # really need to test that the allocation exists before. And, perhaps, skip
+  # the following tasks if it doesn't
 - name: List partitions in our allocation (only)
   ansible.builtin.command:
     cmd: vipu-admin list partitions --allocation {{allocation_name}} --showjson

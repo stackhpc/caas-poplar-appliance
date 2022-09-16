@@ -29,23 +29,7 @@ parameters:
       choices:
         - "No partition required"
         - "Single reconfigurable partition"
-    immutable: true
-
-  - name: vipu_port
-    kind: integer
-    label: VIPU Port
-    description: Port for VIPU server communication.
-    immutable: true
-    required: true
-    default: 8090
-
-  - name: vipu_ipaddr
-    kind: string
-    label: VIPU Server IP address
-    description: IP address for the VIPU server
-    immutable: true
-    required: true
-    default: 10.129.110.13
+    immutable: false
 
   - name: cluster_flavor
     kind: cloud.size
@@ -67,23 +51,49 @@ parameters:
       min: 10
     immutable: true
 
+  - name: vipu_port
+    kind: integer
+    label: VIPU Port
+    description: Port for VIPU server communication.
+    immutable: true
+    required: true
+    default: 8090
+
+  - name: vipu_ipaddr
+    kind: string
+    label: VIPU Server IP address
+    description: IP address for the VIPU server
+    immutable: true
+    required: true
+    default: 10.129.110.13
+
 usage_template: |-
   {% set webconsole = cluster | service("webconsole") %}
   {% set monitoring = cluster | service("monitoring") %}
-  This workstation can be accessed using a web browser via the [Web console service]({{ webconsole.url }}) or by SSH.
+  This Poplar appliance may be accessed in a web browser via the [Web console service]({{ webconsole.url }}) and by SSH.  The SSH key of the user that deployed the appliance is injected into a user account with the same name.
 
-  The SSH key of the user that deployed the workstation is injected into a user account with the same name:
+  SSH access example:
 
   ```
   $ ssh {{ cluster.outputs.cluster_user | default("ubuntu") }}@{{ cluster.outputs.cluster_access_ip | default("[cluster ip]") }}
   {{ cluster.outputs.cluster_user | default("ubuntu")}}@{{ cluster.name }}:~$
   ```
 
-  The data volume is mounted at `/data`, and content stored there will persist for the lifetime
-  of the workstation. Other parts of the filesystem may be affected during a patch operation,
+  The following environment variables have been set in the appliance:
+
+  ```
+  GC_ALLOCATION_NAME={{cluster.outputs.allocation_name}}
+  GC_ALLOCATION_SIZE={{cluster.outputs.allocation_size}}
+  GC_PUBLIC_IP={{cluster.outputs.cluster.outputs.cluster_access_ip | default("[cluster ip]") }}
+  IPUOF_VIPU_API_PARTITION_ID={{cluster.outputs.cluster.outputs.ipuof_vipu_api_partition_id}}
+  IPUOF_VIPU_API_HOST={{cluster.outputs.cluster.outputs.ipuof_vipu_api_host}}
+  ```
+
+  A data volume is mounted at `/data`, and content stored there will persist for the lifetime
+  of the appliance. Other parts of the filesystem may be affected during a patch operation,
   including any packages that have been installed using `apt`.
 
-  Monitoring dashboards for the workstation are available using the [Monitoring service]({{ monitoring.url }}).
+  Monitoring dashboards for the appliance are available using the [Monitoring service]({{ monitoring.url }}).
 
 
 services:
