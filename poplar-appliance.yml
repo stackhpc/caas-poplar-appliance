@@ -29,7 +29,7 @@
         ansible_user: ipuuser
         groups: vipu_server
         allocation_name: "{{appliance_user}}-{{cluster_name}}"
-        partition_name: "{{appliance_user}}-{{cluster_name}}-reconfig"
+#        partition_name: "{{appliance_user}}-{{cluster_name}}-reconfig"
         appliance_user: "{{ appliance_user }}"
 
 - name: (De-)Configure vipu server

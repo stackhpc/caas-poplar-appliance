@@ -45,6 +45,10 @@
 
 - name: Create partition if user requested
   block:
+    - name: Create partition name
+      ansible.builtin.set_fact:
+        partition_name: "{{allocation_name}}-reconfig"
+
     - name: Create partition
       ansible.builtin.command:
         cmd: vipu-admin --showjson create partition {{partition_name}} --size {{allocation_size}} --allocation {{allocation_name}} --reconfigurable
