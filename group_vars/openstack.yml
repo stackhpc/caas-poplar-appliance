@@ -18,3 +18,11 @@ terraform_state: "{{ cluster_state | default('present') }}"
 
 # The user that should be used to SSH to the cluster hosts
 cluster_ssh_user: ipuuser
+
+poplar_appliance_images:
+  - name: "Ubuntu 20.04"
+    friendly: "Focal"
+    image_id: "fef180da-ca78-40b0-954a-10eca2ac831b"
+  - name: "Ubuntu 18.04"
+    friendly: "Bionic"
+    image_id: "4c114921-9a0d-4411-8955-d2adc4dfbae5"
