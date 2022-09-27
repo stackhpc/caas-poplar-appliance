@@ -15,7 +15,9 @@ parameters:
     kind: choice
     default: "Ubuntu 20.04"
     options:
-      choices: "{{ poplar_appliance_images | map(attribute='name') | list }}"
+      choices:
+        - "Ubuntu 20.04"
+        - "Ubuntu 18.04"
     immutable: true
 
   - name: allocation_size
