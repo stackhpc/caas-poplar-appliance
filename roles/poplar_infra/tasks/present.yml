@@ -3,6 +3,7 @@
   ansible.builtin.debug:
     var: ansible_facts
   ignore_unreachable: yes
+  tags: [ debug, never ]
 
 - name: Can we get an allocation of requested size?
   ansible.builtin.command:
@@ -13,6 +14,7 @@
 - name: Debug allocation test
   ansible.builtin.debug:
     var: vipu_alloc_opt
+  tags: [ debug, never ]
 
 - name: Do we have any options
   ansible.builtin.fail:
@@ -31,6 +33,7 @@
     var: vipu_alloc_mk
   when:
     - vipu_alloc_mk is defined
+  tags: [ debug, never ]
 
 - name: List allocation
   ansible.builtin.command:
@@ -42,6 +45,7 @@
     var: vipu_alloc_list
   when:
     - vipu_alloc_list is defined
+  tags: [ debug, never ]
 
 - name: Create partition if user requested
   block:

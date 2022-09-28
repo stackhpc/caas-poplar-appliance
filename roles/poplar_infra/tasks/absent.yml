@@ -7,63 +7,67 @@
   ansible.builtin.debug:
     var: ansible_facts
   ignore_unreachable: yes
+  tags: [ debug, never ]
 
   # This is flakey, if allocation_name isn't known it throws an error so we
-  # really need to test that the allocation exists before. And, perhaps, skip
-  # the following tasks if it doesn't
+  # check the error condition before trying to execute the following block.
 - name: List partitions in our allocation (only)
   ansible.builtin.command:
     cmd: vipu-admin list partitions --allocation {{allocation_name}} --showjson
   register: vipu_partition_list
+  ignore_errors: true
 
-- name: Decode returned JSON
-  set_fact:
-    vipu_partition_json: "{{ vipu_partition_list.stdout | from_json }}"
+- name: Partition removal block
+  block:
+    - name: Decode returned JSON
+      set_fact:
+        vipu_partition_json: "{{ vipu_partition_list.stdout | from_json }}"
 
-- name: Debug partitions in our allocation
-  ansible.builtin.debug:
-    var: item
-  loop: "{{ vipu_partition_json | community.general.json_query('partitions[*].id') }}"
+    - name: Debug partitions in our allocation
+      ansible.builtin.debug:
+        var: item
+      loop: "{{ vipu_partition_json | community.general.json_query('partitions[*].id') }}"
+      tags: [ debug, never ]
 
-  # Assuming this loop won't run if there aren't any partitions in the returned
-  # json, which would look like:
-  #
-  # {
-  #   "partitions":  []
-  # }
-  #
-  # But we might want to test for the number of partitions and not execute if
-  # it is 0?
-- name: Remove partitions in our allocation
-  ansible.builtin.command:
-    cmd: vipu-admin remove partition {{ item }} --force
-  loop: "{{ vipu_partition_json | community.general.json_query('partitions[*].id') }}"
-  register: partition_remove_out
+    - name: Remove partitions in our allocation
+      ansible.builtin.command:
+        cmd: vipu-admin remove partition {{ item }} --force
+      loop: "{{ vipu_partition_json | community.general.json_query('partitions[*].id') }}"
+      register: partition_remove_out
 
-  # Should really test that the partitions were removed
-  # If there were multiple partitions, partition_remove_out will contain
-  # a list(?) of outputs, one per partition. Each of those should have an rc
-  # value, and a stdout containing:
-  #
-  # ipuuser@cl2-pod001-1-ctrl:~$ vipu-admin remove partition jameso-4
-  # Please be patient. This operation can take several seconds
-  # ............
-  # remove partition (jameso-4): success.
+      # Should really test that the partitions were removed
+      # If there were multiple partitions, partition_remove_out will contain
+      # a list(?) of outputs, one per partition. Each of those should have an rc
+      # value, and a stdout containing:
+      #
+      # ipuuser@cl2-pod001-1-ctrl:~$ vipu-admin remove partition jameso-4
+      # Please be patient. This operation can take several seconds
+      # ............
+      # remove partition (jameso-4): success.
+  # End block
+  when: vipu_partition_list.rc >= 1
+
 - name: List allocation
   ansible.builtin.command:
     cmd: vipu-admin --showjson list allocations
   register: vipu_alloc_list
+  ignore_errors: true
 
-- name: Decode returned JSON
-  set_fact:
-    vipu_alloc_json: "{{ vipu_alloc_list.stdout | from_json }}"
+- name: Remove allocation block
+  block:
+    - name: Decode returned JSON
+      set_fact:
+        vipu_alloc_json: "{{ vipu_alloc_list.stdout | from_json }}"
 
-- name: Debug allocation list
-  ansible.builtin.debug:
-    msg: "Clean up allocation list: {{vipu_alloc_json}}"
+    - name: Debug allocation list
+      ansible.builtin.debug:
+        msg: "Clean up allocation list: {{vipu_alloc_json}}"
+      tags: [ debug, never ]
 
-- name: Remove allocation
-  ansible.builtin.command:
-    cmd: vipu-admin remove allocation {{ allocation_name }}
-  register: allocation_remove_out
-  when: vipu_alloc_json.allocations | json_query('[?contains(id, `' + allocation_name + '`)]') | length > 0
+    - name: Remove allocation
+      ansible.builtin.command:
+        cmd: vipu-admin remove allocation {{ allocation_name }}
+      register: allocation_remove_out
+      when: vipu_alloc_json.allocations | json_query('[?contains(id, `' + allocation_name + '`)]') | length > 0
+  # End block
+  when: vipu_alloc_list.rc >= 1
