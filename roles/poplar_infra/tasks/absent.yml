@@ -14,21 +14,25 @@
 - name: List partitions in our allocation (only)
   ansible.builtin.command:
     cmd: vipu-admin list partitions --allocation {{allocation_name}} --showjson
-  register: vipu_partition_list
+  register: vipu_partition_out
   ignore_errors: true
 
 - name: Partition removal block
   block:
+    - name: Convert partition_out to list
+      ansible.builtin.set_fact:
+        vipu_partition_list: "{{ vipu_partition_out.stdout | from_json | community.general.jso    n_query('partitions[*].id') | list }}"
+
     - name: Debug partitions in our allocation
       ansible.builtin.debug:
         var: item
-      loop: "{{ (vipu_partition_list.stdout | default({}))| from_json | community.general.json_query('partitions[*].id') }}"
+      loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
       tags: [ debug, never ]
 
     - name: Remove partitions in our allocation
       ansible.builtin.command:
         cmd: vipu-admin remove partition {{ item }} --force
-      loop: "{{ (vipu_partition_list.stdout | default('{}', true)) | from_json | community.general.json_query('partitions[*].id') | default([]) }}"
+      loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
       register: partition_remove_out
 
       # Should really test that the partitions were removed
@@ -41,7 +45,7 @@
       # ............
       # remove partition (jameso-4): success.
   # End block
-  when: vipu_partition_list.rc == 0
+  when: vipu_partition_out.rc == 0
 
 - name: List allocation
   ansible.builtin.command:
