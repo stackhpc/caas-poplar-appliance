@@ -45,7 +45,7 @@
       # ............
       # remove partition (jameso-4): success.
   # End block
-  when: vipu_partition_list.rc >= 1
+  when: vipu_partition_list.rc == 0
 
 - name: List allocation
   ansible.builtin.command:
@@ -70,4 +70,4 @@
       register: allocation_remove_out
       when: vipu_alloc_json.allocations | json_query('[?contains(id, `' + allocation_name + '`)]') | length > 0
   # End block
-  when: vipu_alloc_list.rc >= 1
+  when: vipu_alloc_list.rc == 0
