@@ -28,7 +28,7 @@
     - name: Remove partitions in our allocation
       ansible.builtin.command:
         cmd: vipu-admin remove partition {{ item }} --force
-      loop: "{{ (vipu_partition_list.stdout | default('{}', true)) | from_json | community.general.json_query('partitions[*].id') }}"
+      loop: "{{ (vipu_partition_list.stdout | default('{}', true)) | from_json | community.general.json_query('partitions[*].id') | default([]) }}"
       register: partition_remove_out
 
       # Should really test that the partitions were removed
