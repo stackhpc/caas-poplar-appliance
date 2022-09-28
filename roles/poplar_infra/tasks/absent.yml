@@ -19,20 +19,16 @@
 
 - name: Partition removal block
   block:
-    - name: Decode returned JSON
-      set_fact:
-        vipu_partition_json: "{{ vipu_partition_list.stdout | from_json }}"
-
     - name: Debug partitions in our allocation
       ansible.builtin.debug:
         var: item
-      loop: "{{ vipu_partition_json | community.general.json_query('partitions[*].id') }}"
+      loop: "{{ vipu_partition_list.stdout | from_json | community.general.json_query('partitions[*].id') }}"
       tags: [ debug, never ]
 
     - name: Remove partitions in our allocation
       ansible.builtin.command:
         cmd: vipu-admin remove partition {{ item }} --force
-      loop: "{{ vipu_partition_json | community.general.json_query('partitions[*].id') }}"
+      loop: "{{ vipu_partition_list.stdout | from_json | community.general.json_query('partitions[*].id') }}"
       register: partition_remove_out
 
       # Should really test that the partitions were removed
