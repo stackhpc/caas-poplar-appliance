@@ -1,5 +1,7 @@
+##
 # The default Terraform state key for backends that support it
-terraform_state_key: "cluster/{{ cluster_id }}/tfstate"
+# We've added the `role_name` parameter to the StackHPC standard definition
+terraform_state_key: "cluster/{{ cluster_id }}/{{ role_name }}/tfstate"
 
 # Set up the terraform backend
 terraform_backend_type: "{{ 'consul' if 'CONSUL_HTTP_ADDR' in ansible_env else 'local' }}"
@@ -12,17 +14,22 @@ terraform_backend_config: "{{ terraform_backend_config_defaults[terraform_backen
 
 terraform_binary_directory: "{{ playbook_dir }}/bin"
 terraform_binary_path: "{{ terraform_binary_directory }}/terraform"
-terraform_project_path: "{{ playbook_dir }}/terraform"
+# We've added the `role_name` parameter to the StackHPC standard definition
+terraform_project_path: "{{ playbook_dir }}/{{ role_name}}/terraform"
 
 terraform_state: "{{ cluster_state | default('present') }}"
 
 # The user that should be used to SSH to the cluster hosts
 cluster_ssh_user: ipuuser
 
+##
+# These are the images that will be available for user selection
+# TODO: Need to move away from ID to a more robust identifier
+# e.g. tag `gc_tag_latest`
 poplar_appliance_images:
   - name: "Ubuntu 20.04"
     friendly: "Focal"
-    image_id: "fef180da-ca78-40b0-954a-10eca2ac831b"
+    image_id: "505d5c0a-8a12-4801-a161-2c962dd95d49"
   - name: "Ubuntu 18.04"
     friendly: "Bionic"
-    image_id: "4c114921-9a0d-4411-8955-d2adc4dfbae5"
+    image_id: "97396a62-07ca-411a-8baf-e219b0b200dc"

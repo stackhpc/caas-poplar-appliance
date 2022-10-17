@@ -1,55 +1,104 @@
 ---
-- name: Populate inventory with VIPU server
-  hosts: localhost
+- name: Gather some information on user & project
+  hosts: openstack
   tasks:
-    - name: Install openstack cli
-      ansible.builtin.pip:
-        name: python-openstackclient
-
     - name: Get openstack user name
       ansible.builtin.shell:
-        cmd: /home/runner/.local/bin/openstack user show "$(/home/runner/.local/bin/openstack token issue -f value -c user_id)" -f value -c name
-      register: openstack_cli_out
-      # Can we do something here with the "environment" property to set a PATH
-      # that includes /home/runner/.local/bin. Or, even better determine the
-      # install location and add that to PATH
+        cmd: openstack user show "$(openstack token issue -f value -c user_id)" -f value -c name
+      register: openstack_cli_user
 
-    - name: Debug openstack cli
+    - name: Debug openstack cli user
       ansible.builtin.debug:
-        var: openstack_cli_out
+        var: openstack_cli_user
+      tags: [ debug, never ]
 
     - name: Set user name
       ansible.builtin.set_fact:
-        appliance_user: "{{ openstack_cli_out.stdout | default( 'ipuuser') }}"
+        appliance_user: "{{ openstack_cli_user.stdout | default( 'ipuuser') }}"
 
-    - name: Add to inventory
-      ansible.builtin.add_host:
-        name: vipu_ctrl
-        ansible_host: 10.129.110.13
-        ansible_user: ipuuser
-        groups: vipu_server
+    - name: Get user's openstack project ID
+      ansible.builtin.shell:
+        cmd: openstack token issue -f value -c project_id
+      register: openstack_cli_proj
+
+    - name: Debug openstack cli proj ID
+      ansible.builtin.debug:
+        var: openstack_cli_proj
+      tags: [ debug, never ]
+
+    - name: Set user project ID fact
+      ansible.builtin.set_fact:
+        appliance_project: "{{ openstack_cli_proj.stdout | default( 'ipuops') }}"
+
+    - name: Get tenancy name
+      ansible.builtin.shell:
+        cmd: openstack project show "$(openstack token issue -f value -c project_id)" -f value -c name
+      register: openstack_cli_tenancy_name
+
+    - name: Debug openstack tenancy name
+      ansible.builtin.debug:
+        msg: "{{ openstack_cli_tenancy_name.stdout }}"
+      tags: [ debug, never ]
+
+    - name: Set user tenancy name fact
+      ansible.builtin.set_fact:
+        appliance_tenancy: "{{ openstack_cli_tenancy_name.stdout | default( 'ipuops') }}"
+
+    - name: Get the name of the cloud from the tags on our tenancy
+      ansible.builtin.shell:
+        cmd: openstack project show {{ appliance_tenancy }} -f json -c tags
+      register: openstack_cloud_name
+
+    - name: Debug openstack name
+      ansible.builtin.debug:
+        var: openstack_cloud_name
+      tags: [ debug, never ]
+
+    - name: Extract cloud name
+      ansible.builtin.set_fact:
+        gc_cloud: "{{ openstack_cloud_name.stdout | from_json | json_query('tags[0]') | replace('-','_') }}"
+
+    - ansible.builtin.debug:
+        msg: "CLOUD NAME is: {{ gc_cloud }}"
+      tags: [ debug, never ]
+
+    - name: Set allocation name
+      ansible.builtin.set_fact:
         allocation_name: "{{appliance_user}}-{{cluster_name}}"
-#        partition_name: "{{appliance_user}}-{{cluster_name}}-reconfig"
-        appliance_user: "{{ appliance_user }}"
 
-- name: (De-)Configure vipu server
-  hosts: vipu_ctrl
-  vars:
-    terraform_state: "{{ cluster_state | default('present') }}"
+    - name: Generate partition name
+      ansible.builtin.set_fact:
+        user_partition: "{{ ('Single reconfigurable partition' in partition_choice) | ternary(allocation_name ~ '-reconfig', 'N/A')  }}"
+
+    - name: Define the terraform state
+      ansible.builtin.set_fact:
+        terraform_state: "{{ cluster_state | default('present') }}"
+
+    - name: Include the vars we need
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      loop:
+        - "{{playbook_dir}}/group_vars/{{gc_cloud}}.yaml"
+        - "{{playbook_dir}}/group_vars/ipums.yaml"
+
+
+- name: Create the frontend (needs super powers) - runs only on create
+  hosts: openstack
   tasks:
     - name: Include poplar infra role
       ansible.builtin.include_role:
         name: poplar_infra
-        tasks_from: "{{ terraform_state }}.yml"
+        tasks_from: "present.yml"
+      when: terraform_state == "present"
 
-- name: Provision infrastructure
+
+- name: Create/Destroy the Poplar VM - always runs
   hosts: openstack
   roles:
     - cluster_infra
   vars:
     cluster_image: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_id') | first }}"
-    allocation_name: "{{hostvars['vipu_ctrl']['allocation_name'] | default('none')}}"
-    partition_name: "{{hostvars['vipu_ctrl']['partition_name'] | default('none')}}"
+
   post_tasks:
     - name: Wait for Monitoring to become available
       uri:
@@ -90,6 +139,22 @@
       tags: never
 
 
+- name: Destroy the frontend (needs super powers)
+  hosts: openstack
+  vars:
+    allocation_name: "{{ allocation_name }}"
+    appliance_user: "{{ appliance_user }}"
+    appliance_project: "{{ appliance_project }}"
+    appliance_tenancy: "{{ appliance_tenancy }}"
+    terraform_state: "{{ terraform_state }}"
+  tasks:
+    - name: Include poplar infra role
+      ansible.builtin.include_role:
+        name: poplar_infra
+        tasks_from: "absent.yml"
+      when: terraform_state == "absent"
+
+
 - hosts: localhost
   tasks:
     - name: debug inventory
@@ -104,7 +169,8 @@
           cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_access_ip }}"
           cluster_user: "{{ hostvars[groups['openstack'][0]].cluster_user }}"
           cluster_flavour_name: "{{ hostvars[groups['openstack'][0]].cluster_flavour_name }}"
-          allocation_name: "{{ hostvars['vipu_ctrl'].allocation_name }}"
-          allocation_size: "{{ hostvars['vipu_ctrl'].allocation_size }}"
-          ipuof_vipu_api_partition_id: "{{ hostvars['vipu_ctrl'].partition_name | default('none') }}"
-          ipuof_vipu_api_host: "{{ hostvars['vipu_ctrl'].vipu_ipaddr }}"
+          cluster_operating_system: "{{ hostvars[groups['openstack'][0]].operating_system }}"
+          allocation_name: "{{ hostvars[groups['openstack'][0]].allocation_name }}"
+          allocation_size: "{{ hostvars[groups['openstack'][0]].allocation_size }}"
+          ipuof_vipu_api_partition_id: "{{ hostvars[groups['openstack'][0]].user_partition | default('none') }}"
+          ipuof_vipu_api_host: "{{ hostvars[groups['openstack'][0]].vipu_ipaddr }}"

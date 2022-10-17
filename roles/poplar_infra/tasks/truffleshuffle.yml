@@ -1,0 +1,80 @@
+---
+# Goonies never say die
+#
+- name: Install Terraform binary
+  include_role:
+    name: stackhpc.terraform.install
+
+- name: Make Terraform project directory
+  file:
+    path: "{{ terraform_project_path }}"
+    state: directory
+
+- ansible.builtin.debug:
+    var: hostvars[inventory_hostname]
+
+- name: Write out our IPUM set
+  ansible.builtin.copy:
+    content: "{{ hostvars[inventory_hostname][gc_cloud] }}"
+    dest: "{{ terraform_project_path }}/ipums.yml"
+
+- name: Get ipum file for debug
+  ansible.builtin.slurp:
+    src: "{{ terraform_project_path }}/ipums.yml"
+  register: slurpfile
+#  tags: [ never, debug ]
+
+- name: Debug ipum file
+  ansible.builtin.debug:
+    msg: "{{ slurpfile['content'] | b64decode }}"
+#  tags: [ never, debug ]
+
+- name: Write backend configuration
+  copy:
+    content: |
+      terraform {
+        backend "{{ terraform_backend_type }}" { }
+      }
+    dest: "{{ terraform_project_path }}/backend.tf"
+
+- name: Template Terraform files into project directory
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ terraform_project_path }}/{{ item }}"
+  loop:
+    - outputs.tf
+    - providers.tf
+    - resources.tf
+
+- name: Make ssh directory
+  ansible.builtin.file:
+    path: ~/.ssh
+    state: directory
+
+- name: Get GitLab hostkeys
+  ansible.builtin.shell:
+    cmd: ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+
+##
+# Terraform the items:
+#   - Creates dedicated user RNIC network
+#   - RBAC's user RNIC network
+#   - Adds IPUMs to user RNIC network
+# Aka: "Do the truffle shuffle!" - Clark 'Mouth' Devereaux
+- name: Provision infrastructure
+  community.general.terraform:
+    binary_path: "{{ terraform_binary_path }}"
+    project_path: "{{ terraform_project_path }}"
+    state: "{{ terraform_state }}"
+    backend_config: "{{ terraform_backend_config }}"
+    force_init: yes
+    init_reconfigure: yes
+  register: terraform_provision
+
+- name: Populate facts from Terraform outputs
+  set_fact:
+    user_rnic_net_id: "{{ terraform_provision.outputs.user_rnic_net_id.value }}"
+    user_rnic_subnet_id: "{{ terraform_provision.outputs.user_rnic_subnet_id.value }}"
+    common_ctrl_net_id: "{{ terraform_provision.outputs.common_ctrl_net_id.value}}"
+  when:
+    - terraform_state == "present"

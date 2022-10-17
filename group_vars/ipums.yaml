@@ -1,0 +1,82 @@
+---
+# This file contains properties for the IPUMS in the clouds/clusters
+# The structure is intended to be:
+# cloud1:
+#   podname1:
+#     cloud1-podname1-ipum1:
+#     .
+#     .
+#     cloud1-podname1-ipumN:
+# cloud2:
+#   podname1:
+#     cloud2-podname1-ipum1:
+#     .
+#     .
+#     cloud2-podname1-ipumN:
+#
+gbnwp_cl2:
+  gbnwp_cl2:
+    pod001_ipum1:
+      rnic: { mac: "0c:42:a1:84:e8:25", ip: 10.5.1.1, sw: gbnwp-cl2-tor, port: Ethernet9/1 }
+      bmc: { mac: "70:69:79:20:0E:0C", ip: 10.1.1.1 }
+      gw: { mac: "70:69:79:20:0E:0D", ip: 10.2.1.1 }
+    pod001_ipum2:
+      rnic: { mac: "0c:42:a1:84:e9:55", ip: 10.5.1.2, sw: gbnwp-cl2-tor, port: Ethernet10/1 }
+      bmc: { mac: "70:69:79:20:0F:70", ip: 10.1.1.2 }
+      gw: { mac: "70:69:79:20:0F:71", ip: 10.2.1.2 }
+    pod001_ipum3:
+      rnic: { mac: "0c:42:a1:78:7d:fd", ip: 10.5.1.3, sw: gbnwp-cl2-tor, port: Ethernet11/1 }
+      bmc: { mac: "70:69:79:20:0F:BC", ip: 10.1.1.3 }
+      gw: { mac: "70:69:79:20:0F:BD", ip: 10.2.1.3 }
+    pod001_ipum4:
+      rnic: { mac: "0c:42:a1:84:f5:25", ip: 10.5.1.4, sw: gbnwp-cl2-tor, port: Ethernet12/1 }
+      bmc: { mac: "70:69:79:20:0F:28", ip: 10.1.1.4 }
+      gw: { mac: "70:69:79:20:0F:29", ip: 10.2.1.4 }
+    pod001_ipum5:
+      rnic: { mac: "0c:42:a1:84:eb:dd", ip: 10.5.1.5, sw: gbnwp-cl2-tor, port: Ethernet13/1 }
+      bmc: { mac: "70:69:79:20:10:B4", ip: 10.1.1.5 }
+      gw: { mac: "70:69:79:20:10:B5", ip: 10.2.1.5 }
+    pod001_ipum6:
+      rnic: { mac: "b8:ce:f6:8f:d0:2f", ip: 10.5.1.6, sw: gbnwp-cl2-tor, port: Ethernet14/1 }
+      bmc: { mac: "70:69:79:20:33:CC", ip: 10.1.1.6 }
+      gw: { mac: "70:69:79:20:33:CD", ip: 10.2.1.6 }
+    pod001_ipum7:
+      rnic: { mac: "0c:42:a1:78:7d:f5", ip: 10.5.1.7, sw: gbnwp-cl2-tor, port: Ethernet15/1 }
+      bmc: { mac: "70:69:79:20:0E:C4", ip: 10.1.1.7 }
+      gw: { mac: "70:69:79:20:0E:C5", ip: 10.2.1.7 }
+    pod001_ipum8:
+      rnic: { mac: "0c:42:a1:84:f6:ad", ip: 10.5.1.8, sw: gbnwp-cl2-tor, port: Ethernet16/1 }
+      bmc: { mac: "70:69:79:20:0E:40", ip: 10.1.1.8 }
+      gw: { mac: "70:69:79:20:0E:41", ip: 10.2.1.8 }
+    pod001_ipum9:
+      rnic: { mac: "0c:42:a1:84:f1:65", ip: 10.5.1.9, sw: gbnwp-cl2-tor, port: Ethernet17/1 }
+      bmc: { mac: "70:69:79:20:10:E4", ip: 10.1.1.9 }
+      gw: { mac: "70:69:79:20:10:E5", ip: 10.2.1.9 }
+    pod001_ipum10:
+      rnic: { mac: "0c:42:a1:78:96:b5", ip: 10.5.1.10, sw: gbnwp-cl2-tor, port: Ethernet18/1 }
+      bmc: { mac: "70:69:79:20:0E:80", ip: 10.1.1.10 }
+      gw: { mac: "70:69:79:20:0E:81", ip: 10.2.1.10 }
+    pod001_ipum11:
+      rnic: { mac: "0c:42:a1:84:f1:2d", ip: 10.5.1.11, sw: gbnwp-cl2-tor, port: Ethernet19/1 }
+      bmc: { mac: "70:69:79:20:0E:28", ip: 10.1.1.11 }
+      gw: { mac: "70:69:79:20:0E:29", ip: 10.2.1.11 }
+    pod001_ipum12:
+      rnic: { mac: "0c:42:a1:84:f9:ad", ip: 10.5.1.12, sw: gbnwp-cl2-tor, port: Ethernet20/1 }
+      bmc: { mac: "70:69:79:20:0E:D8", ip: 10.1.1.12 }
+      gw: { mac: "70:69:79:20:0E:D9", ip: 10.2.1.12 }
+    pod001_ipum13:
+      rnic: { mac: "0c:42:a1:84:e9:5d", ip: 10.5.1.13, sw: gbnwp-cl2-tor, port: Ethernet21/1 }
+      bmc: { mac: "70:69:79:20:0D:98", ip: 10.1.1.13 }
+      gw: { mac: "70:69:79:20:0D:99", ip: 10.2.1.13 }
+    pod001_ipum14:
+      rnic: { mac: "0c:42:a1:84:f5:35", ip: 10.5.1.14, sw: gbnwp-cl2-tor, port: Ethernet22/1 }
+      bmc: { mac: "70:69:79:20:0F:00", ip: 10.1.1.14 }
+      gw: { mac: "70:69:79:20:0F:01", ip: 10.2.1.14 }
+    pod001_ipum15:
+      rnic: { mac: "0c:42:a1:84:f1:85", ip: 10.5.1.15, sw: gbnwp-cl2-tor, port: Ethernet23/1 }
+      bmc: { mac: "70:69:79:20:11:58", ip: 10.1.1.15 }
+      gw: { mac: "70:69:79:20:11:59", ip: 10.2.1.15 }
+    pod001_ipum16:
+      rnic: { mac: "0c:42:a1:84:f6:c5", ip: 10.5.1.16, sw: gbnwp-cl2-tor, port: Ethernet24/1 }
+      bmc: { mac: "70:69:79:20:0D:F4", ip: 10.1.1.16 }
+      gw: { mac: "70:69:79:20:0D:F5", ip: 10.2.1.16 }

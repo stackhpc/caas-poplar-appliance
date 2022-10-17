@@ -53,23 +53,38 @@ resource "openstack_blockstorage_volume_v3" "data_volume" {
 ##### Cluster networks
 #####
 
-data "openstack_networking_network_v2" "rnicnet" {
-  tags = [ "rnic" ]
+# When we are destroying these resources, we need to get:
+# - user_rnic_net_id
+# - user_rnic_subnet_id
+# Which are usually supplied by the frontend TF
+
+{% if terraform_state == 'absent' %}
+data "openstack_networking_network_v2" "userrnicnet" {
+  tags = [ "user-rnic", "{{cluster_name}}", "{{cluster_id}}", "{{appliance_user}}" ]
 }
 
-data "openstack_networking_subnet_v2" "rnicsub" {
-  tags = [ "rnic" ]
+data "openstack_networking_subnet_v2" "userrnicsub" {
+  tags = [ "user-rnic", "{{cluster_name}}", "{{cluster_id}}", "{{appliance_user}}" ]
 }
+{% endif %}
 
 resource "openstack_networking_port_v2" "rnic" {
   name      = "{{ cluster_name }}-{{ cluster_type }}-rnic"
-  network_id     = data.openstack_networking_network_v2.rnicnet.id
+{% if terraform_state == 'absent' %}
+  network_id     = "${data.openstack_networking_network_v2.userrnicnet.id}"
+{% else %}
+  network_id     = "{{ user_rnic_net_id }}"
+{% endif %}
   admin_state_up = "true"
   binding {
     vnic_type = "direct"
   }
   fixed_ip {
-    subnet_id = data.openstack_networking_subnet_v2.rnicsub.id
+{% if terraform_state == 'absent' %}
+    subnet_id = "${data.openstack_networking_subnet_v2.userrnicsub.id}"
+{% else %}
+    subnet_id = "{{ user_rnic_subnet_id }}"
+{% endif %}
   }
   port_security_enabled = "false"
   # don't overrite os-vif adding chosen PCI device
@@ -80,8 +95,27 @@ resource "openstack_networking_port_v2" "rnic" {
   }
 }
 
+# This block brings up a second NIC in the appliance
+data "openstack_networking_network_v2" "ctrlnet" {
+  tags = [ "ctrl", "azimuth-vpod-common-ctrl" ]
+}
+
+data "openstack_networking_subnet_v2" "ctrlsub" {
+  tags = [ "ctrl", "azimuth-vpod-common-ctrl" ]
+}
+
+resource "openstack_networking_port_v2" "ctrl" {
+  name      = "{{ cluster_name }}-{{ cluster_type }}-ctrl"
+  network_id     = data.openstack_networking_network_v2.ctrlnet.id
+  admin_state_up = "true"
+  fixed_ip {
+    subnet_id = data.openstack_networking_subnet_v2.ctrlsub.id
+  }
+}
+
 resource "openstack_networking_floatingip_v2" "app-fip" {
   pool = "external"
+  port_id = "${openstack_networking_port_v2.ctrl.id}"
 }
 
 #####
@@ -105,16 +139,25 @@ resource "openstack_compute_instance_v2" "cluster_server" {
         ssh_authorized_keys:
           - {{ cluster_user_ssh_public_key }}
     mounts:
-      - [ ephemeral0, /localdata, auto, "defaults" ]
+      - [ ephemeral0, /localdata, auto, "defaults,nofail" ]
     write_files:
-    - content: |
-        [Match]
-        MACAddress=${openstack_networking_port_v2.rnic.mac_address}
-        [Network]
-        DHCP=yes
-        [DHCPv4]
-        UseDNS=false
-    path: /etc/systemd/network/06-rnic.network
+      - path: /etc/systemd/network/05-ctrl.network
+        content: |
+          [Match]
+          MACAddress=${openstack_networking_port_v2.ctrl.mac_address}
+          [Network]
+          DHCP=yes
+          [DHCPv4]
+          UseDNS=yes
+    write_files:
+      - path: /etc/systemd/network/06-rnic.network
+        content: |
+          [Match]
+          MACAddress=${openstack_networking_port_v2.rnic.mac_address}
+          [Network]
+          DHCP=yes
+          [DHCPv4]
+          UseDNS=false
     runcmd:
       - [ systemctl, restart, systemd-networkd]
   EOF
@@ -139,15 +182,18 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     appliance_pub_ip = "${openstack_networking_floatingip_v2.app-fip.address}"
     allocation_name = "{{ allocation_name }}"
     allocation_size = "{{ allocation_size }}"
-    partition_name  = "{{ partition_name | default('none') }}"
-    vipu_ipaddr     = "{{ vipu_ipaddr }}"
+    partition_name  = "{{ user_partition  }}"
+    vipu_ipaddr     = "{{ vipu_servers[appliance_tenancy]['ctrl_net_ip'] }}"
     vipu_port       = "{{ vipu_port }}"
   }
 
   network {
-    port = openstack_networking_port_v2.rnic.id
+    port = "${openstack_networking_port_v2.rnic.id}"
   }
 
+  network {
+    port = "${openstack_networking_port_v2.ctrl.id}"
+  }
 }
 
 resource "openstack_compute_volume_attach_v2" "zenith_volume" {
@@ -159,19 +205,3 @@ resource "openstack_compute_volume_attach_v2" "data_volume" {
   instance_id = "${openstack_compute_instance_v2.cluster_server.id}"
   volume_id   = "${openstack_blockstorage_volume_v3.data_volume.id}"
 }
-
-resource "openstack_compute_floatingip_associate_v2" "app-fip-assoc" {
-  floating_ip = "${openstack_networking_floatingip_v2.app-fip.address}"
-  instance_id = "${openstack_compute_instance_v2.cluster_server.id}"
-}
-
-#{% if cluster_floating_ip_address is defined and cluster_floating_ip_address %}
-######
-###### Floating IP association
-######
-#
-#resource "openstack_compute_floatingip_associate_v2" "cluster_floatingip_assoc" {
-#  floating_ip = "{{ cluster_floating_ip_address }}"
-#  instance_id = "${openstack_compute_instance_v2.cluster_server.id}"
-#}
-#{% endif %}

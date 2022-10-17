@@ -1,0 +1,20 @@
+---
+# This file contains parameters common to all gbnwp-cl2:
+#   - projects/tenancies
+#   - vpods
+
+##
+# Use the following VIPU servers
+vipu_ver: "1.18.0"
+vipu_servers:
+  sysopssandpit:
+    floating_ip: "10.129.110.16"
+    ctrl_net_ip: "10.3.213.164"
+    name: "azimuth-vpod-common-ctrl.gbnwp-cl2.ipu.graphcore.ai"
+
+dns_base: "openstack.graphcore.ai."
+
+##
+# Required by vpod-nets, value doesn't matter in our context because we're not
+# routing the RNIC networks.
+cidr_hint: "25"
