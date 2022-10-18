@@ -1,7 +1,11 @@
 # This is used to determine the image to use unless explicitly patching
 output "cluster_image" {
   description = "The id of the image used to build the cluster nodes"
-  value       = "{{ cluster_previous_image | default(cluster_image) }}"
+{% if cluster_previous_image is defined %}
+  value  = "{{ cluster_previous_image }}"
+{% else %}
+  value  = "${data.openstack_images_image_v2.image.id}"
+{% endif %}
 }
 
 output "cluster_flavour_name" {

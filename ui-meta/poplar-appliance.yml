@@ -63,14 +63,6 @@ parameters:
       min: 10
     immutable: true
 
-  - name: vipu_port
-    kind: integer
-    label: VIPU Port
-    description: Port for VIPU server communication.
-    immutable: true
-    required: true
-    default: 8090
-
 usage_template: |-
   {% set webconsole = cluster | service("webconsole") %}
   {% set monitoring = cluster | service("monitoring") %}

@@ -111,6 +111,8 @@ resource "openstack_networking_port_v2" "ctrl" {
   fixed_ip {
     subnet_id = data.openstack_networking_subnet_v2.ctrlsub.id
   }
+  port_security_enabled = "true"
+  security_group_ids = [ openstack_networking_secgroup_v2.cluster_secgroup.id ]
 }
 
 resource "openstack_networking_floatingip_v2" "app-fip" {
@@ -122,9 +124,20 @@ resource "openstack_networking_floatingip_v2" "app-fip" {
 ##### Cluster nodes
 #####
 
+##
+# Select image based on name and tag
+data "openstack_images_image_v2" "image" {
+  name = "{{ image_name }}"
+  tag =  "{{ image_tag }}"
+}
+
 resource "openstack_compute_instance_v2" "cluster_server" {
   name      = "{{ cluster_name }}"
-  image_id  = "{{ cluster_previous_image | default(cluster_image) }}"
+{% if cluster_previous_image is defined %}
+  image_id  = "{{ cluster_previous_image }}"
+{% else %}
+  image_id  = "${data.openstack_images_image_v2.image.id}"
+{% endif %}
   flavor_id = "{{ cluster_flavor }}"
 
 {% if cluster_user_ssh_public_key is defined and cluster_user_ssh_public_key %}

@@ -97,7 +97,8 @@
   roles:
     - cluster_infra
   vars:
-    cluster_image: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_id') | first }}"
+    image_name: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_name') | first }}"
+    image_tag: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_tag') | first }}"
 
   post_tasks:
     - name: Wait for Monitoring to become available
@@ -173,4 +174,4 @@
           allocation_name: "{{ hostvars[groups['openstack'][0]].allocation_name }}"
           allocation_size: "{{ hostvars[groups['openstack'][0]].allocation_size }}"
           ipuof_vipu_api_partition_id: "{{ hostvars[groups['openstack'][0]].user_partition | default('none') }}"
-          ipuof_vipu_api_host: "{{ hostvars[groups['openstack'][0]].vipu_ipaddr }}"
+          ipuof_vipu_api_host: "{{ hostvars[groups['openstack'][0]].vipu_servers[appliance_tenancy]['ctrl_net_ip'] }}"
