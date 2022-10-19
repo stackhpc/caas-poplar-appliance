@@ -14,6 +14,522 @@
 #     .
 #     cloud2-podname1-ipumN:
 #
+
+gbnwp-cl1:
+  gbnwp-cl1:
+    pod046_ipum1:
+      rnic: { mac: "b8:ce:f6:97:31:0f", ip: 10.5.46.1, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet24/1 }
+      bmc: { mac: "70:69:79:20:48:38", ip: 10.1.46.1 }
+      gw: { mac: "70:69:79:20:48:39", ip: 10.2.46.1 }
+    pod046_ipum2:
+      rnic: { mac: "04:3f:72:f3:c5:7b", ip: 10.5.46.2, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet23/1 }
+      bmc: { mac: "70:69:79:20:47:14", ip: 10.1.46.2 }
+      gw: { mac: "70:69:79:20:47:15", ip: 10.2.46.2 }
+    pod046_ipum3:
+      rnic: { mac: "04:3f:72:f3:bf:53", ip: 10.5.46.3, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet22/1 }
+      bmc: { mac: "70:69:79:20:47:24", ip: 10.1.46.3 }
+      gw: { mac: "70:69:79:20:47:25", ip: 10.2.46.3 }
+    pod046_ipum4:
+      rnic: { mac: "b8:ce:f6:9c:cb:ff", ip: 10.5.46.4, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet21/1 }
+      bmc: { mac: "70:69:79:20:47:EC", ip: 10.1.46.4 }
+      gw: { mac: "70:69:79:20:47:ED", ip: 10.2.46.4 }
+    pod046_ipum5:
+      rnic: { mac: "b8:ce:f6:9c:cc:07", ip: 10.5.46.5, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet20/1 }
+      bmc: { mac: "70:69:79:20:47:D0", ip: 10.1.46.5 }
+      gw: { mac: "70:69:79:20:47:D1", ip: 10.2.46.5 }
+    pod046_ipum6:
+      rnic: { mac: "1c:34:da:67:1f:71", ip: 10.5.46.6, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet19/1 }
+      bmc: { mac: "70:69:79:20:46:E0", ip: 10.1.46.6 }
+      gw: { mac: "70:69:79:20:46:E1", ip: 10.2.46.6 }
+    pod046_ipum7:
+      rnic: { mac: "b8:ce:f6:9c:ca:cf", ip: 10.5.46.7, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet18/1 }
+      bmc: { mac: "70:69:79:20:47:60", ip: 10.1.46.7 }
+      gw: { mac: "70:69:79:20:47:61", ip: 10.2.46.7 }
+    pod046_ipum8:
+      rnic: { mac: "b8:ce:f6:97:37:d7", ip: 10.5.46.8, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet17/1 }
+      bmc: { mac: "70:69:79:20:47:2C", ip: 10.1.46.8 }
+      gw: { mac: "70:69:79:20:47:2D", ip: 10.2.46.8 }
+    pod046_ipum9:
+      rnic: { mac: "1c:34:da:67:22:09", ip: 10.5.46.9, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet16/1 }
+      bmc: { mac: "70:69:79:20:48:A4", ip: 10.1.46.9 }
+      gw: { mac: "70:69:79:20:48:A5", ip: 10.2.46.9 }
+    pod046_ipum10:
+      rnic: { mac: "04:3f:72:f3:cf:6b", ip: 10.5.46.10, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet15/1 }
+      bmc: { mac: "70:69:79:20:46:DC", ip: 10.1.46.10 }
+      gw: { mac: "70:69:79:20:46:DD", ip: 10.2.46.10 }
+    pod046_ipum11:
+      rnic: { mac: "10:70:fd:18:65:35", ip: 10.5.46.11, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet14/1 }
+      bmc: { mac: "70:69:79:20:48:E0", ip: 10.1.46.11 }
+      gw: { mac: "70:69:79:20:48:E1", ip: 10.2.46.11 }
+    pod046_ipum12:
+      rnic: { mac: "10:70:fd:1a:73:85", ip: 10.5.46.12, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet13/1 }
+      bmc: { mac: "70:69:79:20:48:94", ip: 10.1.46.12 }
+      gw: { mac: "70:69:79:20:48:95", ip: 10.2.46.12 }
+    pod046_ipum13:
+      rnic: { mac: "b8:ce:f6:9c:cc:af", ip: 10.5.46.13, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet12/1 }
+      bmc: { mac: "70:69:79:20:48:B8", ip: 10.1.46.13 }
+      gw: { mac: "70:69:79:20:48:B9", ip: 10.2.46.13 }
+    pod046_ipum14:
+      rnic: { mac: "04:3f:72:a2:c8:c3", ip: 10.5.46.14, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet11/1 }
+      bmc: { mac: "70:69:79:20:45:A0", ip: 10.1.46.14 }
+      gw: { mac: "70:69:79:20:45:A1", ip: 10.2.46.14 }
+    pod046_ipum15:
+      rnic: { mac: "b8:ce:f6:97:2e:0f", ip: 10.5.46.15, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet10/1 }
+      bmc: { mac: "70:69:79:20:48:58", ip: 10.1.46.15 }
+      gw: { mac: "70:69:79:20:48:59", ip: 10.2.46.15 }
+    pod046_ipum16:
+      rnic: { mac: "b8:ce:f6:8f:cd:a7", ip: 10.5.46.16, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet9/1 }
+      bmc: { mac: "70:69:79:20:47:BC", ip: 10.1.46.16 }
+      gw: { mac: "70:69:79:20:47:BD", ip: 10.2.46.16 }
+    pod047_ipum1:
+      rnic: { mac: "04:3f:72:f3:d1:f3", ip: 10.5.47.1, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet24/1 }
+      bmc: { mac: "70:69:79:20:47:38", ip: 10.1.47.1 }
+      gw: { mac: "70:69:79:20:47:39", ip: 10.2.47.1 }
+    pod047_ipum2:
+      rnic: { mac: "b8:ce:f6:9c:cb:87", ip: 10.5.47.2, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet23/1 }
+      bmc: { mac: "70:69:79:20:46:78", ip: 10.1.47.2 }
+      gw: { mac: "70:69:79:20:46:79", ip: 10.2.47.2 }
+    pod047_ipum3:
+      rnic: { mac: "0c:42:a1:78:89:95", ip: 10.5.47.3, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet22/1 }
+      bmc: { mac: "70:69:79:20:46:E8", ip: 10.1.47.3 }
+      gw: { mac: "70:69:79:20:46:E9", ip: 10.2.47.3 }
+    pod047_ipum4:
+      rnic: { mac: "10:70:fd:1a:73:8d", ip: 10.5.47.4, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet21/1 }
+      bmc: { mac: "70:69:79:20:48:F0", ip: 10.1.47.4 }
+      gw: { mac: "70:69:79:20:48:F1", ip: 10.2.47.4 }
+    pod047_ipum5:
+      rnic: { mac: "b8:ce:f6:9c:ca:a7", ip: 10.5.47.5, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet20/1 }
+      bmc: { mac: "70:69:79:20:47:64", ip: 10.1.47.5 }
+      gw: { mac: "70:69:79:20:47:65", ip: 10.2.47.5 }
+    pod047_ipum6:
+      rnic: { mac: "b8:ce:f6:9c:cb:77", ip: 10.5.47.6, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet19/1 }
+      bmc: { mac: "70:69:79:20:48:34", ip: 10.1.47.6 }
+      gw: { mac: "70:69:79:20:48:35", ip: 10.2.47.6 }
+    pod047_ipum7:
+      rnic: { mac: "1c:34:da:67:1c:a1", ip: 10.5.47.7, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet18/1 }
+      bmc: { mac: "70:69:79:20:47:50", ip: 10.1.47.7 }
+      gw: { mac: "70:69:79:20:47:51", ip: 10.2.47.7 }
+    pod047_ipum8:
+      rnic: { mac: "1c:34:da:67:16:81", ip: 10.5.47.8, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet17/1 }
+      bmc: { mac: "70:69:79:20:46:B8", ip: 10.1.47.8 }
+      gw: { mac: "70:69:79:20:46:B9", ip: 10.2.47.8 }
+    pod047_ipum9:
+      rnic: { mac: "08:c0:eb:24:a0:b3", ip: 10.5.47.9, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet16/1 }
+      bmc: { mac: "70:69:79:20:49:2C", ip: 10.1.47.9 }
+      gw: { mac: "70:69:79:20:49:2D", ip: 10.2.47.9 }
+    pod047_ipum10:
+      rnic: { mac: "b8:ce:f6:97:37:df", ip: 10.5.47.10, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet15/1 }
+      bmc: { mac: "70:69:79:20:49:1C", ip: 10.1.47.10 }
+      gw: { mac: "70:69:79:20:49:1D", ip: 10.2.47.10 }
+    pod047_ipum11:
+      rnic: { mac: "b8:ce:f6:9c:cb:f7", ip: 10.5.47.11, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet14/1 }
+      bmc: { mac: "70:69:79:20:46:7C", ip: 10.1.47.11 }
+      gw: { mac: "70:69:79:20:46:7D", ip: 10.2.47.11 }
+    pod047_ipum12:
+      rnic: { mac: "b8:ce:f6:97:38:1f", ip: 10.5.47.12, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet13/1 }
+      bmc: { mac: "70:69:79:20:47:20", ip: 10.1.47.12 }
+      gw: { mac: "70:69:79:20:47:21", ip: 10.2.47.12 }
+    pod047_ipum13:
+      rnic: { mac: "b8:ce:f6:97:2e:b7", ip: 10.5.47.13, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet12/1 }
+      bmc: { mac: "70:69:79:20:47:E0", ip: 10.1.47.13 }
+      gw: { mac: "70:69:79:20:47:E1", ip: 10.2.47.13 }
+    pod047_ipum14:
+      rnic: { mac: "10:70:fd:1a:73:5d", ip: 10.5.47.14, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet11/1 }
+      bmc: { mac: "70:69:79:20:48:B4", ip: 10.1.47.14 }
+      gw: { mac: "70:69:79:20:48:B5", ip: 10.2.47.14 }
+    pod047_ipum15:
+      rnic: { mac: "10:70:fd:1a:70:ed", ip: 10.5.47.15, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet10/1 }
+      bmc: { mac: "70:69:79:20:4A:0C", ip: 10.1.47.15 }
+      gw: { mac: "70:69:79:20:4A:0D", ip: 10.2.47.15 }
+    pod047_ipum16:
+      rnic: { mac: "0c:42:a1:84:ed:bd", ip: 10.5.47.16, sw: gbnwp-pod047-sw2.ipmi.graphcore.ai, port: Ethernet9/1 }
+      bmc: { mac: "70:69:79:20:47:B0", ip: 10.1.47.16 }
+      gw: { mac: "70:69:79:20:47:B1", ip: 10.2.47.16 }
+    pod048_ipum1:
+      rnic: { mac: "10:70:fd:1a:47:e5", ip: 10.5.48.1, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet24/1 }
+      bmc: { mac: "70:69:79:20:4B:38", ip: 10.1.48.1 }
+      gw: { mac: "70:69:79:20:4B:39", ip: 10.2.48.1 }
+    pod048_ipum2:
+      rnic: { mac: "10:70:fd:18:64:2d", ip: 10.5.48.2, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet23/1 }
+      bmc: { mac: "70:69:79:20:4B:2C", ip: 10.1.48.2 }
+      gw: { mac: "70:69:79:20:4B:2D", ip: 10.2.48.2 }
+    pod048_ipum3:
+      rnic: { mac: "10:70:fd:1a:47:d5", ip: 10.5.48.3, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet22/1 }
+      bmc: { mac: "70:69:79:20:4A:F8", ip: 10.1.48.3 }
+      gw: { mac: "70:69:79:20:4A:F9", ip: 10.2.48.3 }
+    pod048_ipum4:
+      rnic: { mac: "10:70:fd:18:55:fd", ip: 10.5.48.4, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet21/1 }
+      bmc: { mac: "70:69:79:20:4B:40", ip: 10.1.48.4 }
+      gw: { mac: "70:69:79:20:4B:41", ip: 10.2.48.4 }
+    pod048_ipum5:
+      rnic: { mac: "10:70:fd:18:63:fd", ip: 10.5.48.5, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet20/1 }
+      bmc: { mac: "70:69:79:20:4B:18", ip: 10.1.48.5 }
+      gw: { mac: "70:69:79:20:4B:19", ip: 10.2.48.5 }
+    pod048_ipum6:
+      rnic: { mac: "10:70:fd:1a:47:dd", ip: 10.5.48.6, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet19/1 }
+      bmc: { mac: "70:69:79:20:4B:50", ip: 10.1.48.6 }
+      gw: { mac: "70:69:79:20:4B:51", ip: 10.2.48.6 }
+    pod048_ipum7:
+      rnic: { mac: "10:70:fd:18:66:9d", ip: 10.5.48.7, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet18/1 }
+      bmc: { mac: "70:69:79:20:4A:FC", ip: 10.1.48.7 }
+      gw: { mac: "70:69:79:20:4A:FD", ip: 10.2.48.7 }
+    pod048_ipum8:
+      rnic: { mac: "10:70:fd:18:6f:9d", ip: 10.5.48.8, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet17/1 }
+      bmc: { mac: "70:69:79:20:4B:48", ip: 10.1.48.8 }
+      gw: { mac: "70:69:79:20:4B:49", ip: 10.2.48.8 }
+    pod048_ipum9:
+      rnic: { mac: "10:70:fd:18:64:35", ip: 10.5.48.9, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet16/1 }
+      bmc: { mac: "70:69:79:20:4B:34", ip: 10.1.48.9 }
+      gw: { mac: "70:69:79:20:4B:35", ip: 10.2.48.9 }
+    pod048_ipum10:
+      rnic: { mac: "10:70:fd:18:55:a5", ip: 10.5.48.10, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet15/1 }
+      bmc: { mac: "70:69:79:20:4B:0C", ip: 10.1.48.10 }
+      gw: { mac: "70:69:79:20:4B:0D", ip: 10.2.48.10 }
+    pod048_ipum11:
+      rnic: { mac: "10:70:fd:1a:72:ad", ip: 10.5.48.11, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet14/1 }
+      bmc: { mac: "70:69:79:20:46:D8", ip: 10.1.48.11 }
+      gw: { mac: "70:69:79:20:46:D9", ip: 10.2.48.11 }
+    pod048_ipum12:
+      rnic: { mac: "10:70:fd:1a:4a:5d", ip: 10.5.48.12, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet13/1 }
+      bmc: { mac: "70:69:79:20:48:2C", ip: 10.1.48.12 }
+      gw: { mac: "70:69:79:20:48:2D", ip: 10.2.48.12 }
+    pod048_ipum13:
+      rnic: { mac: "10:70:fd:18:54:55", ip: 10.5.48.13, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet12/1 }
+      bmc: { mac: "70:69:79:20:47:C4", ip: 10.1.48.13 }
+      gw: { mac: "70:69:79:20:47:C5", ip: 10.2.48.13 }
+    pod048_ipum14:
+      rnic: { mac: "10:70:fd:1a:4c:dd", ip: 10.5.48.14, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet11/1 }
+      bmc: { mac: "70:69:79:20:46:90", ip: 10.1.48.14 }
+      gw: { mac: "70:69:79:20:46:91", ip: 10.2.48.14 }
+    pod048_ipum15:
+      rnic: { mac: "10:70:fd:1a:4b:bd", ip: 10.5.48.15, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet10/1 }
+      bmc: { mac: "70:69:79:20:46:00", ip: 10.1.48.15 }
+      gw: { mac: "70:69:79:20:46:01", ip: 10.2.48.15 }
+    pod048_ipum16:
+      rnic: { mac: "1c:34:da:67:1e:d1", ip: 10.5.48.16, sw: gbnwp-pod048-sw2.ipmi.graphcore.ai, port: Ethernet9/1 }
+      bmc: { mac: "70:69:79:20:48:DC", ip: 10.1.48.16 }
+      gw: { mac: "70:69:79:20:48:DD", ip: 10.2.48.16 }
+    pod049_ipum1:
+      rnic: { mac: "04:3f:72:f3:c2:a3", ip: 10.5.49.1, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet24/1 }
+      bmc: { mac: "70:69:79:20:46:A0", ip: 10.1.49.1 }
+      gw: { mac: "70:69:79:20:46:A1", ip: 10.2.49.1 }
+    pod049_ipum2:
+      rnic: { mac: "0c:42:a1:84:ec:5d", ip: 10.5.49.2, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet23/1 }
+      bmc: { mac: "70:69:79:20:48:C4", ip: 10.1.49.2 }
+      gw: { mac: "70:69:79:20:48:C5", ip: 10.2.49.2 }
+    pod049_ipum3:
+      rnic: { mac: "0c:42:a1:78:8d:cd", ip: 10.5.49.3, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet22/1 }
+      bmc: { mac: "70:69:79:20:47:28", ip: 10.1.49.3 }
+      gw: { mac: "70:69:79:20:47:29", ip: 10.2.49.3 }
+    pod049_ipum4:
+      rnic: { mac: "08:c0:eb:2e:74:5d", ip: 10.5.49.4, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet21/1 }
+      bmc: { mac: "70:69:79:20:48:98", ip: 10.1.49.4 }
+      gw: { mac: "70:69:79:20:48:99", ip: 10.2.49.4 }
+    pod049_ipum5:
+      rnic: { mac: "10:70:fd:18:53:8d", ip: 10.5.49.5, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet20/1 }
+      bmc: { mac: "70:69:79:20:49:8C", ip: 10.1.49.5 }
+      gw: { mac: "70:69:79:20:49:8D", ip: 10.2.49.5 }
+    pod049_ipum6:
+      rnic: { mac: "0c:42:a1:78:7d:95", ip: 10.5.49.6, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet19/1 }
+      bmc: { mac: "70:69:79:20:49:10", ip: 10.1.49.6 }
+      gw: { mac: "70:69:79:20:49:11", ip: 10.2.49.6 }
+    pod049_ipum7:
+      rnic: { mac: "10:70:fd:1a:49:fd", ip: 10.5.49.7, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet18/1 }
+      bmc: { mac: "70:69:79:20:4A:2C", ip: 10.1.49.7 }
+      gw: { mac: "70:69:79:20:4A:2D", ip: 10.2.49.7 }
+    pod049_ipum8:
+      rnic: { mac: "1c:34:da:67:15:21", ip: 10.5.49.8, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet17/1 }
+      bmc: { mac: "70:69:79:20:48:04", ip: 10.1.49.8 }
+      gw: { mac: "70:69:79:20:48:05", ip: 10.2.49.8 }
+    pod049_ipum9:
+      rnic: { mac: "b8:ce:f6:8f:cd:27", ip: 10.5.49.9, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet16/1 }
+      bmc: { mac: "70:69:79:20:47:AC", ip: 10.1.49.9 }
+      gw: { mac: "70:69:79:20:47:AD", ip: 10.2.49.9 }
+    pod049_ipum10:
+      rnic: { mac: "04:3f:72:f3:bf:63", ip: 10.5.49.10, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet15/1 }
+      bmc: { mac: "70:69:79:20:47:7C", ip: 10.1.49.10 }
+      gw: { mac: "70:69:79:20:47:7D", ip: 10.2.49.10 }
+    pod049_ipum11:
+      rnic: { mac: "b8:ce:f6:8f:cb:97", ip: 10.5.49.11, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet14/1 }
+      bmc: { mac: "70:69:79:20:47:A0", ip: 10.1.49.11 }
+      gw: { mac: "70:69:79:20:47:A1", ip: 10.2.49.11 }
+    pod049_ipum12:
+      rnic: { mac: "10:70:fd:1a:70:e5", ip: 10.5.49.12, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet13/1 }
+      bmc: { mac: "70:69:79:20:47:F0", ip: 10.1.49.12 }
+      gw: { mac: "70:69:79:20:47:F1", ip: 10.2.49.12 }
+    pod049_ipum13:
+      rnic: { mac: "10:70:fd:1a:73:4d", ip: 10.5.49.13, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet12/1 }
+      bmc: { mac: "70:69:79:20:49:14", ip: 10.1.49.13 }
+      gw: { mac: "70:69:79:20:49:15", ip: 10.2.49.13 }
+    pod049_ipum14:
+      rnic: { mac: "10:70:fd:18:6c:ed", ip: 10.5.49.14, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet11/1 }
+      bmc: { mac: "70:69:79:20:48:F4", ip: 10.1.49.14 }
+      gw: { mac: "70:69:79:20:48:F5", ip: 10.2.49.14 }
+    pod049_ipum15:
+      rnic: { mac: "10:70:fd:1a:4b:1d", ip: 10.5.49.15, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet10/1 }
+      bmc: { mac: "70:69:79:20:49:B8", ip: 10.1.49.15 }
+      gw: { mac: "70:69:79:20:49:B9", ip: 10.2.49.15 }
+    pod049_ipum16:
+      rnic: { mac: "04:3f:72:f3:d4:bb", ip: 10.5.49.16, sw: gbnwp-pod049-sw2.ipmi.graphcore.ai, port: Ethernet9/1 }
+      bmc: { mac: "70:69:79:20:47:0C", ip: 10.1.49.16 }
+      gw: { mac: "70:69:79:20:47:0D", ip: 10.2.49.16 }
+    pod051_ipum1:
+      rnic: { mac: "04:3f:72:a2:c9:0b", ip: 10.5.51.1, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet24/1 }
+      bmc: { mac: "70:69:79:20:45:BC", ip: 10.1.51.1 }
+      gw: { mac: "70:69:79:20:45:BD", ip: 10.2.51.1 }
+    pod051_ipum2:
+      rnic: { mac: "04:3f:72:a2:bf:6b", ip: 10.5.51.2, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet23/1 }
+      bmc: { mac: "70:69:79:20:46:50", ip: 10.1.51.2 }
+      gw: { mac: "70:69:79:20:46:51", ip: 10.2.51.2 }
+    pod051_ipum3:
+      rnic: { mac: "04:3f:72:a2:c8:bb", ip: 10.5.51.3, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet22/1 }
+      bmc: { mac: "70:69:79:20:45:E4", ip: 10.1.51.3 }
+      gw: { mac: "70:69:79:20:45:E5", ip: 10.2.51.3 }
+    pod051_ipum4:
+      rnic: { mac: "04:3f:72:a2:bd:43", ip: 10.5.51.4, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet21/1 }
+      bmc: { mac: "70:69:79:20:46:14", ip: 10.1.51.4 }
+      gw: { mac: "70:69:79:20:46:15", ip: 10.2.51.4 }
+    pod051_ipum5:
+      rnic: { mac: "b8:ce:f6:8f:c8:97", ip: 10.5.51.5, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet20/1 }
+      bmc: { mac: "70:69:79:20:45:14", ip: 10.1.51.5 }
+      gw: { mac: "70:69:79:20:45:15", ip: 10.2.51.5 }
+    pod051_ipum6:
+      rnic: { mac: "04:3f:72:a2:c2:e3", ip: 10.5.51.6, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet19/1 }
+      bmc: { mac: "70:69:79:20:41:84", ip: 10.1.51.6 }
+      gw: { mac: "70:69:79:20:41:85", ip: 10.2.51.6 }
+    pod051_ipum7:
+      rnic: { mac: "04:3f:72:a2:bc:eb", ip: 10.5.51.7, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet18/1 }
+      bmc: { mac: "70:69:79:20:44:1C", ip: 10.1.51.7 }
+      gw: { mac: "70:69:79:20:44:1D", ip: 10.2.51.7 }
+    pod051_ipum8:
+      rnic: { mac: "04:3f:72:a2:c3:7b", ip: 10.5.51.8, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet17/1 }
+      bmc: { mac: "70:69:79:20:43:F4", ip: 10.1.51.8 }
+      gw: { mac: "70:69:79:20:43:F5", ip: 10.2.51.8 }
+    pod051_ipum9:
+      rnic: { mac: "04:3f:72:a2:ba:2b", ip: 10.5.51.9, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet16/1 }
+      bmc: { mac: "70:69:79:20:42:80", ip: 10.1.51.9 }
+      gw: { mac: "70:69:79:20:42:81", ip: 10.2.51.9 }
+    pod051_ipum10:
+      rnic: { mac: "04:3f:72:a2:cd:5b", ip: 10.5.51.10, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet15/1 }
+      bmc: { mac: "70:69:79:20:43:C8", ip: 10.1.51.10 }
+      gw: { mac: "70:69:79:20:43:C9", ip: 10.2.51.10 }
+    pod051_ipum11:
+      rnic: { mac: "04:3f:72:a2:cb:23", ip: 10.5.51.11, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet14/1 }
+      bmc: { mac: "70:69:79:20:43:E0", ip: 10.1.51.11 }
+      gw: { mac: "70:69:79:20:43:E1", ip: 10.2.51.11 }
+    pod051_ipum12:
+      rnic: { mac: "04:3f:72:a2:cb:0b", ip: 10.5.51.12, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet13/1 }
+      bmc: { mac: "70:69:79:20:44:40", ip: 10.1.51.12 }
+      gw: { mac: "70:69:79:20:44:41", ip: 10.2.51.12 }
+    pod051_ipum13:
+      rnic: { mac: "04:3f:72:f3:c2:bb", ip: 10.5.51.13, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet12/1 }
+      bmc: { mac: "70:69:79:20:47:6C", ip: 10.1.51.13 }
+      gw: { mac: "70:69:79:20:47:6D", ip: 10.2.51.13 }
+    pod051_ipum14:
+      rnic: { mac: "04:3f:72:f3:ce:9b", ip: 10.5.51.14, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet11/1 }
+      bmc: { mac: "70:69:79:20:46:D0", ip: 10.1.51.14 }
+      gw: { mac: "70:69:79:20:46:D1", ip: 10.2.51.14 }
+    pod051_ipum15:
+      rnic: { mac: "04:3f:72:f3:ce:73", ip: 10.5.51.15, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet10/1 }
+      bmc: { mac: "70:69:79:20:46:BC", ip: 10.1.51.15 }
+      gw: { mac: "70:69:79:20:46:BD", ip: 10.2.51.15 }
+    pod051_ipum16:
+      rnic: { mac: "04:3f:72:a2:b7:5b", ip: 10.5.51.16, sw: gbnwp-pod051-sw2.ipmi.graphcore.ai, port: Ethernet9/1 }
+      bmc: { mac: "70:69:79:20:43:E8", ip: 10.1.51.16 }
+      gw: { mac: "70:69:79:20:43:E9", ip: 10.2.51.16 }
+    pod052_ipum1:
+      rnic: { mac: "04:3f:72:a2:c3:eb", ip: 10.5.52.1, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet24/1 }
+      bmc: { mac: "70:69:79:20:45:F8", ip: 10.1.52.1 }
+      gw: { mac: "70:69:79:20:45:F9", ip: 10.2.52.1 }
+    pod052_ipum2:
+      rnic: { mac: "04:3f:72:a2:c8:7b", ip: 10.5.52.2, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet23/1 }
+      bmc: { mac: "70:69:79:20:46:2C", ip: 10.1.52.2 }
+      gw: { mac: "70:69:79:20:46:2D", ip: 10.2.52.2 }
+    pod052_ipum3:
+      rnic: { mac: "04:3f:72:a2:b6:8b", ip: 10.5.52.3, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet22/1 }
+      bmc: { mac: "70:69:79:20:45:EC", ip: 10.1.52.3 }
+      gw: { mac: "70:69:79:20:45:ED", ip: 10.2.52.3 }
+    pod052_ipum4:
+      rnic: { mac: "04:3f:72:a2:b0:43", ip: 10.5.52.4, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet21/1 }
+      bmc: { mac: "70:69:79:20:45:FC", ip: 10.1.52.4 }
+      gw: { mac: "70:69:79:20:45:FD", ip: 10.2.52.4 }
+    pod052_ipum5:
+      rnic: { mac: "04:3f:72:a2:c7:1b", ip: 10.5.52.5, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet20/1 }
+      bmc: { mac: "70:69:79:20:45:28", ip: 10.1.52.5 }
+      gw: { mac: "70:69:79:20:45:29", ip: 10.2.52.5 }
+    pod052_ipum6:
+      rnic: { mac: "04:3f:72:a2:c8:8b", ip: 10.5.52.6, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet19/1 }
+      bmc: { mac: "70:69:79:20:46:58", ip: 10.1.52.6 }
+      gw: { mac: "70:69:79:20:46:59", ip: 10.2.52.6 }
+    pod052_ipum7:
+      rnic: { mac: "04:3f:72:a2:bd:13", ip: 10.5.52.7, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet18/1 }
+      bmc: { mac: "70:69:79:20:46:48", ip: 10.1.52.7 }
+      gw: { mac: "70:69:79:20:46:49", ip: 10.2.52.7 }
+    pod052_ipum8:
+      rnic: { mac: "b8:ce:f6:8f:ca:47", ip: 10.5.52.8, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet17/1 }
+      bmc: { mac: "70:69:79:20:45:5C", ip: 10.1.52.8 }
+      gw: { mac: "70:69:79:20:45:5D", ip: 10.2.52.8 }
+    pod052_ipum9:
+      rnic: { mac: "04:3f:72:a2:be:23", ip: 10.5.52.9, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet16/1 }
+      bmc: { mac: "70:69:79:20:45:60", ip: 10.1.52.9 }
+      gw: { mac: "70:69:79:20:45:61", ip: 10.2.52.9 }
+    pod052_ipum10:
+      rnic: { mac: "04:3f:72:a2:bd:9b", ip: 10.5.52.10, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet15/1 }
+      bmc: { mac: "70:69:79:20:45:58", ip: 10.1.52.10 }
+      gw: { mac: "70:69:79:20:45:59", ip: 10.2.52.10 }
+    pod052_ipum11:
+      rnic: { mac: "b8:ce:f6:8f:c8:a7", ip: 10.5.52.11, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet14/1 }
+      bmc: { mac: "70:69:79:20:45:54", ip: 10.1.52.11 }
+      gw: { mac: "70:69:79:20:45:55", ip: 10.2.52.11 }
+    pod052_ipum12:
+      rnic: { mac: "04:3f:72:a2:c9:73", ip: 10.5.52.12, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet13/1 }
+      bmc: { mac: "70:69:79:20:45:B4", ip: 10.1.52.12 }
+      gw: { mac: "70:69:79:20:45:B5", ip: 10.2.52.12 }
+    pod052_ipum13:
+      rnic: { mac: "04:3f:72:a2:bd:73", ip: 10.5.52.13, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet12/1 }
+      bmc: { mac: "70:69:79:20:46:5C", ip: 10.1.52.13 }
+      gw: { mac: "70:69:79:20:46:5D", ip: 10.2.52.13 }
+    pod052_ipum14:
+      rnic: { mac: "04:3f:72:a2:be:7b", ip: 10.5.52.14, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet11/1 }
+      bmc: { mac: "70:69:79:20:45:E0", ip: 10.1.52.14 }
+      gw: { mac: "70:69:79:20:45:E1", ip: 10.2.52.14 }
+    pod052_ipum15:
+      rnic: { mac: "04:3f:72:a2:c9:03", ip: 10.5.52.15, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet10/1 }
+      bmc: { mac: "70:69:79:20:46:0C", ip: 10.1.52.15 }
+      gw: { mac: "70:69:79:20:46:0D", ip: 10.2.52.15 }
+    pod052_ipum16:
+      rnic: { mac: "04:3f:72:a2:be:8b", ip: 10.5.52.16, sw: gbnwp-pod052-sw2.ipmi.graphcore.ai, port: Ethernet9/1 }
+      bmc: { mac: "70:69:79:20:45:8C", ip: 10.1.52.16 }
+      gw: { mac: "70:69:79:20:45:8D", ip: 10.2.52.16 }
+    pod053_ipum1:
+      rnic: { mac: "04:3f:72:a2:b6:83", ip: 10.5.53.1, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet24/1 }
+      bmc: { mac: "70:69:79:20:46:24", ip: 10.1.53.1 }
+      gw: { mac: "70:69:79:20:46:25", ip: 10.2.53.1 }
+    pod053_ipum2:
+      rnic: { mac: "04:3f:72:a2:c9:7b", ip: 10.5.53.2, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet23/1 }
+      bmc: { mac: "70:69:79:20:45:A8", ip: 10.1.53.2 }
+      gw: { mac: "70:69:79:20:45:A9", ip: 10.2.53.2 }
+    pod053_ipum3:
+      rnic: { mac: "04:3f:72:a2:c8:cb", ip: 10.5.53.3, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet22/1 }
+      bmc: { mac: "70:69:79:20:45:7C", ip: 10.1.53.3 }
+      gw: { mac: "70:69:79:20:45:7D", ip: 10.2.53.3 }
+    pod053_ipum4:
+      rnic: { mac: "04:3f:72:a2:c8:db", ip: 10.5.53.4, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet21/1 }
+      bmc: { mac: "70:69:79:20:45:98", ip: 10.1.53.4 }
+      gw: { mac: "70:69:79:20:45:99", ip: 10.2.53.4 }
+    pod053_ipum5:
+      rnic: { mac: "04:3f:72:a2:c2:f3", ip: 10.5.53.5, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet20/1 }
+      bmc: { mac: "70:69:79:20:45:C4", ip: 10.1.53.5 }
+      gw: { mac: "70:69:79:20:45:C5", ip: 10.2.53.5 }
+    pod053_ipum6:
+      rnic: { mac: "04:3f:72:a2:c1:13", ip: 10.5.53.6, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet19/1 }
+      bmc: { mac: "70:69:79:20:45:F0", ip: 10.1.53.6 }
+      gw: { mac: "70:69:79:20:45:F1", ip: 10.2.53.6 }
+    pod053_ipum7:
+      rnic: { mac: "04:3f:72:a2:bd:3b", ip: 10.5.53.7, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet18/1 }
+      bmc: { mac: "70:69:79:20:45:DC", ip: 10.1.53.7 }
+      gw: { mac: "70:69:79:20:45:DD", ip: 10.2.53.7 }
+    pod053_ipum8:
+      rnic: { mac: "04:3f:72:a2:c7:0b", ip: 10.5.53.8, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet17/1 }
+      bmc: { mac: "70:69:79:20:45:84", ip: 10.1.53.8 }
+      gw: { mac: "70:69:79:20:45:85", ip: 10.2.53.8 }
+    pod053_ipum9:
+      rnic: { mac: "04:3f:72:a2:c9:53", ip: 10.5.53.9, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet16/1 }
+      bmc: { mac: "70:69:79:20:45:88", ip: 10.1.53.9 }
+      gw: { mac: "70:69:79:20:45:89", ip: 10.2.53.9 }
+    pod053_ipum10:
+      rnic: { mac: "04:3f:72:a2:bd:7b", ip: 10.5.53.10, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet15/1 }
+      bmc: { mac: "70:69:79:20:45:74", ip: 10.1.53.10 }
+      gw: { mac: "70:69:79:20:45:75", ip: 10.2.53.10 }
+    pod053_ipum11:
+      rnic: { mac: "04:3f:72:a2:c8:2b", ip: 10.5.53.11, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet14/1 }
+      bmc: { mac: "70:69:79:20:46:1C", ip: 10.1.53.11 }
+      gw: { mac: "70:69:79:20:46:1D", ip: 10.2.53.11 }
+    pod053_ipum12:
+      rnic: { mac: "04:3f:72:a2:c8:13", ip: 10.5.53.12, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet13/1 }
+      bmc: { mac: "70:69:79:20:45:9C", ip: 10.1.53.12 }
+      gw: { mac: "70:69:79:20:45:9D", ip: 10.2.53.12 }
+    pod053_ipum13:
+      rnic: { mac: "04:3f:72:a2:bd:8b", ip: 10.5.53.13, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet12/1 }
+      bmc: { mac: "70:69:79:20:46:04", ip: 10.1.53.13 }
+      gw: { mac: "70:69:79:20:46:05", ip: 10.2.53.13 }
+    pod053_ipum14:
+      rnic: { mac: "b8:ce:f6:8f:c8:8f", ip: 10.5.53.14, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet11/1 }
+      bmc: { mac: "70:69:79:20:45:6C", ip: 10.1.53.14 }
+      gw: { mac: "70:69:79:20:45:6D", ip: 10.2.53.14 }
+    pod053_ipum15:
+      rnic: { mac: "b8:ce:f6:8f:cd:57", ip: 10.5.53.15, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet10/1 }
+      bmc: { mac: "70:69:79:20:47:54", ip: 10.1.53.15 }
+      gw: { mac: "70:69:79:20:47:55", ip: 10.2.53.15 }
+    pod053_ipum16:
+      rnic: { mac: "04:3f:72:a2:bf:73", ip: 10.5.53.16, sw: gbnwp-pod053-sw2.ipmi.graphcore.ai, port: Ethernet9/1 }
+      bmc: { mac: "70:69:79:20:46:4C", ip: 10.1.53.16 }
+      gw: { mac: "70:69:79:20:46:4D", ip: 10.2.53.16 }
+    pod054_ipum1:
+      rnic: { mac: "04:3f:72:a2:c9:83", ip: 10.5.54.1, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet24/1 }
+      bmc: { mac: "70:69:79:20:45:90", ip: 10.1.54.1 }
+      gw: { mac: "70:69:79:20:45:91", ip: 10.2.54.1 }
+    pod054_ipum2:
+      rnic: { mac: "04:3f:72:a2:a7:83", ip: 10.5.54.2, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet23/1 }
+      bmc: { mac: "70:69:79:20:46:38", ip: 10.1.54.2 }
+      gw: { mac: "70:69:79:20:46:39", ip: 10.2.54.2 }
+    pod054_ipum3:
+      rnic: { mac: "04:3f:72:a2:b2:8b", ip: 10.5.54.3, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet22/1 }
+      bmc: { mac: "70:69:79:20:45:C0", ip: 10.1.54.3 }
+      gw: { mac: "70:69:79:20:45:C1", ip: 10.2.54.3 }
+    pod054_ipum4:
+      rnic: { mac: "04:3f:72:a2:bd:cb", ip: 10.5.54.4, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet21/1 }
+      bmc: { mac: "70:69:79:20:46:34", ip: 10.1.54.4 }
+      gw: { mac: "70:69:79:20:46:35", ip: 10.2.54.4 }
+    pod054_ipum5:
+      rnic: { mac: "04:3f:72:a2:c2:fb", ip: 10.5.54.5, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet20/1 }
+      bmc: { mac: "70:69:79:20:46:10", ip: 10.1.54.5 }
+      gw: { mac: "70:69:79:20:46:11", ip: 10.2.54.5 }
+    pod054_ipum6:
+      rnic: { mac: "04:3f:72:a2:b6:93", ip: 10.5.54.6, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet19/1 }
+      bmc: { mac: "70:69:79:20:45:50", ip: 10.1.54.6 }
+      gw: { mac: "70:69:79:20:45:51", ip: 10.2.54.6 }
+    pod054_ipum7:
+      rnic: { mac: "04:3f:72:a2:c1:db", ip: 10.5.54.7, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet18/1 }
+      bmc: { mac: "70:69:79:20:46:40", ip: 10.1.54.7 }
+      gw: { mac: "70:69:79:20:46:41", ip: 10.2.54.7 }
+    pod054_ipum8:
+      rnic: { mac: "04:3f:72:a2:bd:6b", ip: 10.5.54.8, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet17/1 }
+      bmc: { mac: "70:69:79:20:45:E8", ip: 10.1.54.8 }
+      gw: { mac: "70:69:79:20:45:E9", ip: 10.2.54.8 }
+    pod054_ipum9:
+      rnic: { mac: "04:3f:72:a2:bd:5b", ip: 10.5.54.9, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet16/1 }
+      bmc: { mac: "70:69:79:20:45:D0", ip: 10.1.54.9 }
+      gw: { mac: "70:69:79:20:45:D1", ip: 10.2.54.9 }
+    pod054_ipum10:
+      rnic: { mac: "04:3f:72:a2:bd:ab", ip: 10.5.54.10, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet15/1 }
+      bmc: { mac: "70:69:79:20:45:D8", ip: 10.1.54.10 }
+      gw: { mac: "70:69:79:20:45:D9", ip: 10.2.54.10 }
+    pod054_ipum11:
+      rnic: { mac: "04:3f:72:a2:c8:ab", ip: 10.5.54.11, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet14/1 }
+      bmc: { mac: "70:69:79:20:45:B8", ip: 10.1.54.11 }
+      gw: { mac: "70:69:79:20:45:B9", ip: 10.2.54.11 }
+    pod054_ipum12:
+      rnic: { mac: "04:3f:72:a2:c2:1b", ip: 10.5.54.12, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet13/1 }
+      bmc: { mac: "70:69:79:20:45:B0", ip: 10.1.54.12 }
+      gw: { mac: "70:69:79:20:45:B1", ip: 10.2.54.12 }
+    pod054_ipum13:
+      rnic: { mac: "04:3f:72:a2:bc:cb", ip: 10.5.54.13, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet12/1 }
+      bmc: { mac: "70:69:79:20:46:30", ip: 10.1.54.13 }
+      gw: { mac: "70:69:79:20:46:31", ip: 10.2.54.13 }
+    pod054_ipum14:
+      rnic: { mac: "04:3f:72:a2:b6:eb", ip: 10.5.54.14, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet11/1 }
+      bmc: { mac: "70:69:79:20:45:94", ip: 10.1.54.14 }
+      gw: { mac: "70:69:79:20:45:95", ip: 10.2.54.14 }
+    pod054_ipum15:
+      rnic: { mac: "b8:ce:f6:8f:c9:9f", ip: 10.5.54.15, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet10/1 }
+      bmc: { mac: "70:69:79:20:45:44", ip: 10.1.54.15 }
+      gw: { mac: "70:69:79:20:45:45", ip: 10.2.54.15 }
+    pod054_ipum16:
+      rnic: { mac: "04:3f:72:a2:c8:d3", ip: 10.5.54.16, sw: gbnwp-pod054-sw2.ipmi.graphcore.ai, port: Ethernet9/1 }
+      bmc: { mac: "70:69:79:20:46:20", ip: 10.1.54.16 }
+      gw: { mac: "70:69:79:20:46:21", ip: 10.2.54.16 }
+
 gbnwp_cl2:
   gbnwp_cl2:
     pod001_ipum1:
