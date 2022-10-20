@@ -133,11 +133,8 @@ data "openstack_images_image_v2" "image" {
 
 resource "openstack_compute_instance_v2" "cluster_server" {
   name      = "{{ cluster_name }}"
-{% if cluster_previous_image is defined %}
-  image_id  = "{{ cluster_previous_image }}"
-{% else %}
-  image_id  = "${data.openstack_images_image_v2.image.id}"
-{% endif %}
+
+
   flavor_id = "{{ cluster_flavor }}"
 
 {% if cluster_user_ssh_public_key is defined and cluster_user_ssh_public_key %}
@@ -199,6 +196,20 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     partition_name  = "{{ user_partition  }}"
     vipu_ipaddr     = "{{ vipu_servers[appliance_tenancy]['ctrl_net_ip'] }}"
     vipu_port       = "{{ vipu_port }}"
+  }
+
+  block_device {
+{% if cluster_previous_image is defined %}
+    uuid  = "{{ cluster_previous_image }}"
+{% else %}
+    uuid  = "${data.openstack_images_image_v2.image.id}"
+{% endif %}
+    uuid                  = data.openstack_images_image_v2.image.id
+    source_type           = "image"
+    volume_size           = 100
+    boot_index            = 0
+    destination_type      = "volume"
+    delete_on_termination = true
   }
 
   network {
