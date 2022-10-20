@@ -134,7 +134,6 @@ data "openstack_images_image_v2" "image" {
 resource "openstack_compute_instance_v2" "cluster_server" {
   name      = "{{ cluster_name }}"
 
-
   flavor_id = "{{ cluster_flavor }}"
 
 {% if cluster_user_ssh_public_key is defined and cluster_user_ssh_public_key %}
@@ -204,7 +203,6 @@ resource "openstack_compute_instance_v2" "cluster_server" {
 {% else %}
     uuid  = "${data.openstack_images_image_v2.image.id}"
 {% endif %}
-    uuid                  = data.openstack_images_image_v2.image.id
     source_type           = "image"
     volume_size           = 100
     boot_index            = 0
