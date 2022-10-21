@@ -3,7 +3,7 @@
 # and IPUMs when the Poplar Appliance is created (terraform_state == present)
 - name: Make Terraform project directory
   file:
-    path: "{{ terraform_project_path }}"
+    path: "~/.config/openstack"
     state: directory
 
 - name: Copy clouds.yaml file
