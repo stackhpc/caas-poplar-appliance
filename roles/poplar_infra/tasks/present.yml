@@ -82,7 +82,6 @@
     var: vipu_alloc_list
   when:
     - vipu_alloc_list is defined
-  tags: [ debug, never ]
 
 - name: Create partition if user requested
   block:

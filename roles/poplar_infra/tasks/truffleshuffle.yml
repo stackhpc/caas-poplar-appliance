@@ -23,12 +23,10 @@
   ansible.builtin.slurp:
     src: "{{ terraform_project_path }}/ipums.yml"
   register: slurpfile
-  tags: [ never, debug ]
 
 - name: Debug ipum file
   ansible.builtin.debug:
     msg: "{{ slurpfile['content'] | b64decode }}"
-  tags: [ never, debug ]
 
 - name: Write backend configuration
   copy:
