@@ -3,8 +3,7 @@
   hosts: openstack
   tasks:
     - name: Debug EE environment
-      ansible.builtin.command:
-        cmd: env
+      ansible.builtin.command: /usr/bin/env
       register: env_out
 
     - name: Debug EE environment
