@@ -8,6 +8,15 @@
     src: "{{playbook_dir}}/files/clouds.yaml"
     dest: ~/.config/openstack/
 
+- name: Get clouds.yaml file for debug
+  ansible.builtin.slurp:
+    src: "~/.config/openstack/clouds.yaml"
+  register: slurpfile
+
+- name: Debug clouds.yaml file
+  ansible.builtin.debug:
+    msg: "{{ slurpfile['content'] | b64decode }}"
+
 - name: Can we get an allocation of requested size?
   ansible.builtin.command:
     cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation --options --size {{allocation_size}}
