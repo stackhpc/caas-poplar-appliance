@@ -56,7 +56,7 @@ module "ipum-user-allocs" {
   rnic_network_id = "${openstack_networking_network_v2.user_rnic_net.id}"
   assigned_ipums = {{assigned_ipums_list | tojson }}
   ipum_yaml    = "ipums.yml"
-  az = "gbnwp-cl2-general"
+  az = "{{gc_cloud | replace('_','-')}}-general"
   depends_on = [
    openstack_networking_subnet_v2.user_rnic_subnet
   ]
