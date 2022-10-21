@@ -5,6 +5,10 @@ provider "openstack" {
   cloud = "openstack"
 }
 
+variable "rnic_physnet" {
+  default = "physnet1"
+  }
+
 ##
 # Create an user RNIC network
 #
@@ -15,6 +19,10 @@ resource "openstack_networking_network_v2" "user_rnic_net" {
   # avoid connection tracking in ovn
   port_security_enabled = false
   tags       = [ "user-rnic", "{{cluster_id}}", "{{cluster_name}}", "{{appliance_user}}" ]
+  segments {
+    physical_network = var.rnic_physnet
+    network_type     = "vlan"
+  }
 }
 
 resource "openstack_networking_subnet_v2" "user_rnic_subnet" {
