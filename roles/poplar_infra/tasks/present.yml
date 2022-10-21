@@ -17,10 +17,12 @@
   ansible.builtin.slurp:
     src: "{{ terraform_project_path }}/clouds.yaml"
   register: slurpfile
+  tags: [ debug, never ]
 
 - name: Debug clouds.yaml file
   ansible.builtin.debug:
     msg: "{{ slurpfile['content'] | b64decode }}"
+  tags: [ debug, never ]
 
 - name: Can we get an allocation of requested size?
   ansible.builtin.command:
