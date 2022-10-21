@@ -2,6 +2,15 @@
 - name: Gather some information on user & project
   hosts: openstack
   tasks:
+    - name: Debug EE environment
+      ansible.builtin.command:
+        cmd: env
+      register: env_out
+
+    - name: Debug EE environment
+      ansible.builtin.debug:
+        msg: "Environment is {{env.out}}"
+
     - name: Get openstack user name
       ansible.builtin.shell:
         cmd: openstack user show "$(openstack token issue -f value -c user_id)" -f value -c name
