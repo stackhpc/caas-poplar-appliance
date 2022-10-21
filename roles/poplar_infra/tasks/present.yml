@@ -1,6 +1,10 @@
 ---
 # This task list configures user-defined partitions, Azimuth-defined allocation
 # and IPUMs when the Poplar Appliance is created (terraform_state == present)
+- name: Make Terraform project directory
+  file:
+    path: "{{ terraform_project_path }}"
+    state: directory
 
 - name: Copy clouds.yaml file
   ansible.builtin.copy:
