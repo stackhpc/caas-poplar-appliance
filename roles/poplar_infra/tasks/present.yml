@@ -81,7 +81,7 @@
   ansible.builtin.debug:
     var: assigned_ipums_list
   when:
-    - vipu_alloc_list is defined
+    - assigned_ipums_list is defined
 
 - name: Create partition if user requested
   block:
