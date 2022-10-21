@@ -22,7 +22,6 @@
 - name: Get ipum file for debug
   ansible.builtin.slurp:
     src: "{{ terraform_project_path }}/ipums.yml"
-    src: "{{ terraform_project_path }}/ipums.yml"
   register: slurpfile
   tags: [ never, debug ]
 
