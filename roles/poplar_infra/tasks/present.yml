@@ -31,13 +31,12 @@
   #tags: [ debug, never ]
 
 - name: Debug EE environment
-  ansible.builtin.command:
-    cmd: env
+  ansible.builtin.command: /usr/bin/env
   register: env_out
 
 - name: Debug EE environment
   ansible.builtin.debug:
-    msg: "Environment is {{env.out}}"
+    msg: "Environment is {{env_out}}"
 
 - name: Can we get an allocation of requested size?
   ansible.builtin.command:

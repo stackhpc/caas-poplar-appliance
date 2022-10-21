@@ -87,6 +87,8 @@
     backend_config: "{{ terraform_backend_config }}"
     force_init: yes
     init_reconfigure: yes
+  environment:
+    OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
   register: terraform_provision
 
 - name: Populate facts from Terraform outputs
