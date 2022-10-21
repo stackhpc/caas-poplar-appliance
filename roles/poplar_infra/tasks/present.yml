@@ -15,6 +15,7 @@
     #dest: "{{ terraform_project_path }}/clouds.yaml"
     #dest: "~/.config/openstack/clouds.yaml"
     dest: "/etc/openstack/clouds.yaml"
+    mode: 0666
 
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
