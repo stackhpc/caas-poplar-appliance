@@ -10,7 +10,8 @@
   ansible.builtin.copy:
     decrypt: yes
     src: "{{playbook_dir}}/files/clouds-{{gc_cloud}}.yaml"
-    dest: "{{ terraform_project_path }}/clouds.yaml"
+    #dest: "{{ terraform_project_path }}/clouds.yaml"
+    dest: "~/.config/openstack/"
 
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
