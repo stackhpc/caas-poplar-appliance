@@ -3,7 +3,8 @@
 # and IPUMs when the Poplar Appliance is created (terraform_state == present)
 - name: Make Terraform project directory
   file:
-    path: "~/.config/openstack"
+    #path: "~/.config/openstack"
+    path: "/etc/openstack"
     state: directory
 
 - name: Copy clouds.yaml file
@@ -11,7 +12,8 @@
     decrypt: yes
     src: "{{playbook_dir}}/files/clouds-{{gc_cloud}}.yaml"
     #dest: "{{ terraform_project_path }}/clouds.yaml"
-    dest: "~/.config/openstack/clouds.yaml"
+    #dest: "~/.config/openstack/clouds.yaml"
+    dest: "/etc/openstack/clouds.yaml"
 
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
