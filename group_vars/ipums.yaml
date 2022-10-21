@@ -15,8 +15,8 @@
 #     cloud2-podname1-ipumN:
 #
 
-gbnwp-cl1:
-  gbnwp-cl1:
+gbnwp_cl1:
+  gbnwp_cl1:
     pod046_ipum1:
       rnic: { mac: "b8:ce:f6:97:31:0f", ip: 10.5.46.1, sw: gbnwp-pod046-sw2.ipmi.graphcore.ai, port: Ethernet24/1 }
       bmc: { mac: "70:69:79:20:48:38", ip: 10.1.46.1 }
