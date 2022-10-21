@@ -17,7 +17,8 @@
 
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
-    src: "~/.config/openstack/clouds.yaml"
+    #src: "~/.config/openstack/clouds.yaml"
+    src: "/etc/openstack/clouds.yaml"
   register: slurpfile
   #tags: [ debug, never ]
 
