@@ -2,7 +2,7 @@
 # Use the cloud "openstack" from the clouds.yaml file.
 #
 provider "openstack" {
-  cloud = "{{gc_cloud}}"
+  cloud = "{{gc_cloud | replace('_','-')}}"
 }
 
 ##
