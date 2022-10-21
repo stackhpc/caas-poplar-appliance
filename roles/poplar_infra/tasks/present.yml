@@ -30,6 +30,15 @@
     msg: "{{ slurpfile['content'] | b64decode }}"
   #tags: [ debug, never ]
 
+- name: Debug EE environment
+  ansible.builtin.command:
+    cmd: env
+  register: env_out
+
+- name: Debug EE environment
+  ansible.builtin.debug:
+    msg: "Environment is {{env.out}}"
+
 - name: Can we get an allocation of requested size?
   ansible.builtin.command:
     cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation --options --size {{allocation_size}}
