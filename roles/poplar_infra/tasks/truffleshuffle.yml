@@ -22,6 +22,7 @@
 - name: Get ipum file for debug
   ansible.builtin.slurp:
     src: "{{ terraform_project_path }}/ipums.yml"
+    src: "{{ terraform_project_path }}/ipums.yml"
   register: slurpfile
   tags: [ never, debug ]
 
@@ -58,8 +59,8 @@
 
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
-    src: "~/.config/openstack/clouds.yaml"
-    #src: "/etc/openstack/clouds.yaml"
+    #src: "~/.config/openstack/clouds.yaml"
+    src: "/etc/openstack/clouds.yaml"
     #src: "{{ terraform_project_path }}/clouds.yaml"
   register: slurpfile2
   #tags: [ debug, never ]

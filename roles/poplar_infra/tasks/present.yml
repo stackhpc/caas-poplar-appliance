@@ -13,13 +13,13 @@
     decrypt: yes
     src: "{{playbook_dir}}/files/clouds-{{gc_cloud}}.yaml"
     #dest: "{{ terraform_project_path }}/clouds.yaml"
-    dest: "~/.config/openstack/clouds.yaml"
-    #dest: "/etc/openstack/clouds.yaml"
+    #dest: "~/.config/openstack/clouds.yaml"
+    dest: "/etc/openstack/clouds.yaml"
 
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
-    src: "~/.config/openstack/clouds.yaml"
-    #src: "/etc/openstack/clouds.yaml"
+    #src: "~/.config/openstack/clouds.yaml"
+    src: "/etc/openstack/clouds.yaml"
     #src: "{{ terraform_project_path }}/clouds.yaml"
   register: slurpfile
   #tags: [ debug, never ]
