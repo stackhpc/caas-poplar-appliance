@@ -8,9 +8,10 @@
 vipu_ver: "1.18.0"
 vipu_servers:
   sysopssandpit:
+    name: "azimuth-vpod-common-ctrl.gbnwp-cl1.ipu.graphcore.ai"
     floating_ip: "10.129.110.107"
     ctrl_net_ip: "10.3.47.143"
-    name: "azimuth-vpod-common-ctrl.gbnwp-cl1.ipu.graphcore.ai"
+    vipu_port: "8090"
 
 dns_base: "openstack.graphcore.ai."
 
