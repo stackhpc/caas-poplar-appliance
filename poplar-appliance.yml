@@ -5,10 +5,12 @@
     - name: Debug EE environment
       ansible.builtin.command: /usr/bin/env
       register: env_out
+      tags: [ debug, never ]
 
     - name: Debug EE environment
       ansible.builtin.debug:
         msg: "Environment is {{env_out}}"
+      tags: [ debug, never ]
 
     - name: Get openstack user name
       ansible.builtin.shell:

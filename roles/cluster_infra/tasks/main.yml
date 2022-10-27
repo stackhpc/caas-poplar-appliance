@@ -59,6 +59,17 @@
     - providers.tf
     - resources.tf
 
+- name: Get resources.tf for debug
+  ansible.builtin.slurp:
+    src: "{{ terraform_project_path }}/resources.tf"
+  register: slurpfile
+  tags: [ debug, never ]
+
+- name: Debug resources.tf file
+  ansible.builtin.debug:
+    msg: "{{ slurpfile['content'] | b64decode }}"
+  tags: [ debug, never ]
+
 - name: Provision infrastructure
   community.general.terraform:
     binary_path: "{{ terraform_binary_path }}"

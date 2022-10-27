@@ -1,42 +1,34 @@
 ---
 # This task list configures user-defined partitions, Azimuth-defined allocation
 # and IPUMs when the Poplar Appliance is created (terraform_state == present)
-- name: Make Terraform project directory
-  file:
-    path: "~/.config/openstack"
-    #path: "/etc/openstack"
-    #path: "{{ terraform_project_path }}"
-    state: directory
 
 - name: Copy clouds.yaml file
   ansible.builtin.copy:
     decrypt: yes
     src: "{{playbook_dir}}/files/clouds-{{gc_cloud}}.yaml"
-    #dest: "{{ terraform_project_path }}/clouds.yaml"
-    #dest: "~/.config/openstack/clouds.yaml"
     dest: "/etc/openstack/clouds.yaml"
     mode: 0666
 
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
-    #src: "~/.config/openstack/clouds.yaml"
     src: "/etc/openstack/clouds.yaml"
-    #src: "{{ terraform_project_path }}/clouds.yaml"
   register: slurpfile
-  #tags: [ debug, never ]
+  tags: [ debug, never ]
 
 - name: Debug clouds.yaml file
   ansible.builtin.debug:
     msg: "{{ slurpfile['content'] | b64decode }}"
-  #tags: [ debug, never ]
+  tags: [ debug, never ]
 
 - name: Debug EE environment
   ansible.builtin.command: /usr/bin/env
   register: env_out
+  tags: [ debug, never ]
 
 - name: Debug EE environment
   ansible.builtin.debug:
     msg: "Environment is {{env_out}}"
+  tags: [ debug, never ]
 
 - name: Can we get an allocation of requested size?
   ansible.builtin.command:
@@ -109,4 +101,4 @@
 - name: Remove clouds.yaml file so next play runs as the Azimuth user
   ansible.builtin.file:
     state: absent
-    path: ~/.config/openstack/clouds.yaml
+    path: "/etc/openstack/clouds.yaml"

@@ -23,7 +23,6 @@ resource "openstack_networking_secgroup_rule_v2" "cluster_egress_v4" {
   security_group_id = "${openstack_networking_secgroup_v2.cluster_secgroup.id}"
 }
 
-{% if cluster_user_ssh_public_key is defined and cluster_user_ssh_public_key %}
 # Allow ingress for SSH
 resource "openstack_networking_secgroup_rule_v2" "cluster_ingress_ssh_v4" {
   direction         = "ingress"
@@ -33,7 +32,6 @@ resource "openstack_networking_secgroup_rule_v2" "cluster_ingress_ssh_v4" {
   port_range_max    = 22
   security_group_id = "${openstack_networking_secgroup_v2.cluster_secgroup.id}"
 }
-{% endif %}
 
 #####
 ##### Cluster volumes
@@ -95,7 +93,9 @@ resource "openstack_networking_port_v2" "rnic" {
   }
 }
 
-# This block brings up a second NIC in the appliance
+##
+# This block brings up a Ctrl network interface
+#
 data "openstack_networking_network_v2" "ctrlnet" {
   tags = [ "ctrl", "azimuth-vpod-common-ctrl" ]
 }
@@ -115,10 +115,38 @@ resource "openstack_networking_port_v2" "ctrl" {
   security_group_ids = [ openstack_networking_secgroup_v2.cluster_secgroup.id ]
 }
 
+##
+# This block brings up the storage network interface
+#
+data "openstack_networking_network_v2" "stornet" {
+  tags = [ "storage", "azimuth-vpod-common-storage" ]
+}
+
+data "openstack_networking_subnet_v2" "storsub" {
+  tags = [ "storage", "azimuth-vpod-common-storage" ]
+}
+
+resource "openstack_networking_port_v2" "stor" {
+  name      = "{{ cluster_name }}-{{ cluster_type }}-stor"
+  network_id     = data.openstack_networking_network_v2.stornet.id
+  admin_state_up = "true"
+  fixed_ip {
+    subnet_id = data.openstack_networking_subnet_v2.storsub.id
+  }
+  port_security_enabled = "false"
+  #port_security_enabled = "true"
+  #security_group_ids = [ openstack_networking_secgroup_v2.cluster_secgroup.id ]
+}
+
+
+##
+# This block allocates a public floating IP to the appliance
+#
 resource "openstack_networking_floatingip_v2" "app-fip" {
   pool = "external"
   port_id = "${openstack_networking_port_v2.ctrl.id}"
 }
+
 
 #####
 ##### Cluster nodes
@@ -136,18 +164,8 @@ resource "openstack_compute_instance_v2" "cluster_server" {
 
   flavor_id = "{{ cluster_flavor }}"
 
-{% if cluster_user_ssh_public_key is defined and cluster_user_ssh_public_key %}
   user_data = <<-EOF
     #cloud-config
-    users:
-      - name: "${data.openstack_identity_auth_scope_v3.scope.user_name}"
-        groups: ipupod,docker
-        gecos: "${data.openstack_identity_auth_scope_v3.scope.user_name} ${data.openstack_identity_auth_scope_v3.scope.user_id} ${data.openstack_identity_auth_scope_v3.scope.project_name}"
-        sudo: ALL=(ALL) NOPASSWD:ALL
-        shell: /bin/bash
-        lock_passwd: true
-        ssh_authorized_keys:
-          - {{ cluster_user_ssh_public_key }}
     mounts:
       - [ ephemeral0, /localdata, auto, "defaults,nofail" ]
     write_files:
@@ -159,7 +177,6 @@ resource "openstack_compute_instance_v2" "cluster_server" {
           DHCP=yes
           [DHCPv4]
           UseDNS=yes
-    write_files:
       - path: /etc/systemd/network/06-rnic.network
         content: |
           [Match]
@@ -168,10 +185,39 @@ resource "openstack_compute_instance_v2" "cluster_server" {
           DHCP=yes
           [DHCPv4]
           UseDNS=false
+      - path: /etc/systemd/network/07-stor.network
+        content: |
+          [Match]
+          MACAddress=${openstack_networking_port_v2.stor.mac_address}
+          [Network]
+          DHCP=yes
+          [DHCPv4]
+          UseDNS=false
+      - path: /etc/motd
+        content: |
+           ***************************************************************************
+           * This appliance is provided and maintained by Cloud Development, not IT. *
+           * If you have any questions, concerns, or suggestions for enhancements.   *
+           * please contact #help-gbnwp-cl1 or email: cloud-development@graphcore.ai *
+           ***************************************************************************
+      - path: /etc/ceph/cephfsnethome.secret
+        owner: root:root
+        permissions: 0600
+        content: |
+           {{cephfs_nethome_secret}}
+      - path: /etc/ceph/cephfspublic.secret
+        owner: root:root
+        permissions: 0600
+        content: |
+           {{cephfs_public_secret}}
+      - path: /etc/ansible-init/includes/fstab.addendum
+        content: |
+{% for mnt in additional_mounts %}
+           {{mnt.fs_spec}} {{mnt.fs_file}} {{mnt.fs_vfstype}} {{mnt.fs_mntops}} {{mnt.fs_freq}} {{mnt.fs_passno}}
+{% endfor %}
     runcmd:
       - [ systemctl, restart, systemd-networkd]
   EOF
-{% endif %}
 
   metadata = {
     zenith_volume_id = "${openstack_blockstorage_volume_v3.zenith_volume.id}"
@@ -188,13 +234,14 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     azimuth_user_id = "${data.openstack_identity_auth_scope_v3.scope.user_id}"
     azimuth_project_name = "${data.openstack_identity_auth_scope_v3.scope.project_name}"
     azimuth_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
-    guacamole_user = "${data.openstack_identity_auth_scope_v3.scope.user_name}"
+    guacamole_user = "ipuuser"
     appliance_pub_ip = "${openstack_networking_floatingip_v2.app-fip.address}"
     allocation_name = "{{ allocation_name }}"
     allocation_size = "{{ allocation_size }}"
     partition_name  = "{{ user_partition  }}"
     vipu_ipaddr     = "{{ vipu_servers[appliance_tenancy]['ctrl_net_ip'] }}"
     vipu_port       = "{{ vipu_servers[appliance_tenancy]['vipu_port'] }}"
+    ldap_auth_token = "{{ ldap_auth_token }}"
   }
 
   block_device {
@@ -216,6 +263,10 @@ resource "openstack_compute_instance_v2" "cluster_server" {
 
   network {
     port = "${openstack_networking_port_v2.ctrl.id}"
+  }
+
+  network {
+    port = "${openstack_networking_port_v2.stor.id}"
   }
 }
 

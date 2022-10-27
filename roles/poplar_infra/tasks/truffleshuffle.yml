@@ -23,10 +23,12 @@
   ansible.builtin.slurp:
     src: "{{ terraform_project_path }}/ipums.yml"
   register: slurpfile
+  tags: [ never, debug ]
 
 - name: Debug ipum file
   ansible.builtin.debug:
     msg: "{{ slurpfile['content'] | b64decode }}"
+  tags: [ never, debug ]
 
 - name: Write backend configuration
   copy:
@@ -56,20 +58,14 @@
 
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
-    #src: "~/.config/openstack/clouds.yaml"
     src: "/etc/openstack/clouds.yaml"
-    #src: "{{ terraform_project_path }}/clouds.yaml"
   register: slurpfile2
-  #tags: [ debug, never ]
-
-- name: Debug path
-  ansible.builtin.shell:
-    cmd: echo "~"
+  tags: [ debug, never ]
 
 - name: Debug clouds.yaml file
   ansible.builtin.debug:
     msg: "{{ slurpfile2['content'] | b64decode }}"
-  #tags: [ debug, never ]
+  tags: [ debug, never ]
 
 ##
 # Terraform the items:

@@ -1,11 +1,24 @@
 ---
 # This task list deconfigures partitions, allocations and IPUMs when the Poplar
 # Appliance is torn down (terraform_state == absent)
+
 - name: Copy clouds.yaml file
   ansible.builtin.copy:
     decrypt: yes
-    src: "{{playbook_dir}}/files/clouds.yaml"
-    dest: ~/.config/openstack/
+    src: "{{playbook_dir}}/files/clouds-{{gc_cloud}}.yaml"
+    dest: "/etc/openstack/clouds.yaml"
+    mode: 0666
+
+- name: Get clouds.yaml file for debug
+  ansible.builtin.slurp:
+    src: "/etc/openstack/clouds.yaml"
+  register: slurpfile
+  tags: [ debug, never ]
+
+- name: Debug clouds.yaml file
+  ansible.builtin.debug:
+    msg: "{{ slurpfile['content'] | b64decode }}"
+  tags: [ debug, never ]
 
 # This is flakey, if allocation_name isn't known it throws an error so we
 # check the error condition before trying to execute the following block.
@@ -79,4 +92,4 @@
 - name: Remove clouds.yaml file so next play runs as the Azimuth user
   ansible.builtin.file:
     state: absent
-    path: ~/.config/openstack/clouds.yaml
+    path: "/etc/openstack/clouds.yaml"
