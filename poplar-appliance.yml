@@ -2,6 +2,10 @@
 - name: Gather some information on user & project
   hosts: openstack
   tasks:
+    - name: Log appliance name
+      ansible.builtin.debug:
+        msg: "Building appliance {{cluster_name}}"
+
     - name: Debug EE environment
       ansible.builtin.command: /usr/bin/env
       register: env_out
@@ -91,6 +95,32 @@
         - "{{playbook_dir}}/group_vars/{{gc_cloud}}.yaml"
         - "{{playbook_dir}}/group_vars/ipums.yaml"
 
+    - name: Get ldap uid for appliance user
+      community.general.ldap_search:
+        bind_dn: "{{ ldap_binddn }}"
+        bind_pw: "{{ ldap_auth_token }}"
+        filter: "(&(objectClass=posixAccount)(uid={{appliance_user}}))"
+        scope: subordinate
+        attrs:
+          - "uidNumber"
+        dn: "{{ldap_base}}"
+        server_uri: "{{ldap_uri}}"
+      register: ldap_out
+      delegate_to: localhost
+
+    - name: debug
+      ansible.builtin.debug:
+        msg: "{{ldap_out}}"
+      tags: [ never, debug ]
+
+    - name: Set uid fact for use in cluster_infra
+      ansible.builtin.set_fact:
+        appliance_user_ldap_uid: "{{ ldap_out.results[0].uidNumber | int }}"
+
+    - name: debug
+      ansible.builtin.debug:
+        msg: "{{ appliance_user_ldap_uid }}"
+      tags: [ never, debug ]
 
 - name: Create the frontend (needs super powers) - runs only on create
   hosts: openstack
