@@ -22,3 +22,15 @@ output "cluster_user" {
   description = "Name of the cluster/appliance user"
   value       = "${data.openstack_identity_auth_scope_v3.scope.user_name}"
 }
+
+
+output "user_rnic_net_id" {
+  description = "OpenStack ID for the user's rnic network"
+  value       = "{{ user_rnic_net_id }}"
+}
+
+output "user_rnic_subnet_id" {
+  description = "OpenStack ID for the user's rnic subnet"
+  value       = "{{ user_rnic_subnet_id }}"
+}
+
