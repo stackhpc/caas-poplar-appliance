@@ -1,3 +1,4 @@
+# Modified and renamed by Graphcore Ltd.
 ---
 - name: Gather some information on user & project
   hosts: openstack

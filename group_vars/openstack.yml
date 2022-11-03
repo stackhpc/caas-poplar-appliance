@@ -1,3 +1,5 @@
+# Modified by Graphcore Ltd.
+
 ##
 # The default Terraform state key for backends that support it
 # We've added the `role_name` parameter to the StackHPC standard definition
