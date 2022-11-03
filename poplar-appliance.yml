@@ -152,7 +152,7 @@
               ansible.builtin.fail:
                 msg: Creating reconfigurable partition size {{allocation_size}} in {{allocation_name}}
               when:
-                - vipu_alloc_mk.rc != 0
+                - vipu_part_mk.rc != 0
           when:
             - '"Single reconfigurable partition" in partition_choice'
 
