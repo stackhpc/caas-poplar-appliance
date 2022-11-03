@@ -7,25 +7,10 @@
       ansible.builtin.debug:
         msg: "Building appliance {{cluster_name}}"
 
-    - name: Debug EE environment
-      ansible.builtin.command: /usr/bin/env
-      register: env_out
-      tags: [ debug, never ]
-
-    - name: Debug EE environment
-      ansible.builtin.debug:
-        msg: "Environment is {{env_out}}"
-      tags: [ debug, never ]
-
     - name: Get openstack user name
       ansible.builtin.shell:
         cmd: openstack user show "$(openstack token issue -f value -c user_id)" -f value -c name
       register: openstack_cli_user
-
-    - name: Debug openstack cli user
-      ansible.builtin.debug:
-        var: openstack_cli_user
-      tags: [ debug, never ]
 
     - name: Set user name
       ansible.builtin.set_fact:
@@ -36,11 +21,6 @@
         cmd: openstack token issue -f value -c project_id
       register: openstack_cli_proj
 
-    - name: Debug openstack cli proj ID
-      ansible.builtin.debug:
-        var: openstack_cli_proj
-      tags: [ debug, never ]
-
     - name: Set user project ID fact
       ansible.builtin.set_fact:
         appliance_project: "{{ openstack_cli_proj.stdout | default( 'ipuops') }}"
@@ -49,11 +29,6 @@
       ansible.builtin.shell:
         cmd: openstack project show "$(openstack token issue -f value -c project_id)" -f value -c name
       register: openstack_cli_tenancy_name
-
-    - name: Debug openstack tenancy name
-      ansible.builtin.debug:
-        msg: "{{ openstack_cli_tenancy_name.stdout }}"
-      tags: [ debug, never ]
 
     - name: Set user tenancy name fact
       ansible.builtin.set_fact:
@@ -64,18 +39,9 @@
         cmd: openstack project show {{ appliance_tenancy }} -f json -c tags
       register: openstack_cloud_name
 
-    - name: Debug openstack name
-      ansible.builtin.debug:
-        var: openstack_cloud_name
-      tags: [ debug, never ]
-
     - name: Extract cloud name
       ansible.builtin.set_fact:
         gc_cloud: "{{ openstack_cloud_name.stdout | from_json | json_query('tags[0]') | replace('-','_') }}"
-
-    - ansible.builtin.debug:
-        msg: "CLOUD NAME is: {{ gc_cloud }}"
-      tags: [ debug, never ]
 
     - name: Check allocation size is multiple of 4
       ansible.builtin.fail:
@@ -114,98 +80,201 @@
       register: ldap_out
       delegate_to: localhost
 
-    - name: debug
-      ansible.builtin.debug:
-        msg: "{{ldap_out}}"
-      tags: [ never, debug ]
-
     - name: Set uid fact for use in cluster_infra
       ansible.builtin.set_fact:
         appliance_user_ldap_uid: "{{ ldap_out.results[0].uidNumber | int }}"
 
-    - name: debug
-      ansible.builtin.debug:
-        msg: "{{ appliance_user_ldap_uid }}"
-      tags: [ never, debug ]
-
-- name: Create the frontend (needs super powers) - runs only on create
+- name: Build the appliance
   hosts: openstack
   tasks:
-    - name: Include poplar infra role
-      ansible.builtin.include_role:
-        name: poplar_infra
-        tasks_from: "present.yml"
+    - name: Build the appliance when terraform_state is present
+      block:
+          # This creation can fail because:
+          # 1. There aren't enough free IPUMs
+          # 2. The allocation already exists
+        - name: Create the allocation of requested size
+          ansible.builtin.command:
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
+          register: allocation_result
+      rescue:
+        - name: Fail if there simply is not enough space
+          ansible.builtin.fail:
+            msg: No allocations of size {{allocation_size}} available
+          when: '"no free allocation" in allocation_result.stderr'
+
+        # So here we must have an allocation, which per SYSOP-1090 we must
+        # delete. But the allocation might have partitions, so we need to
+        # list and delete those
+        - name: List partitions in our allocation
+          ansible.builtin.command:
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 list partitions --allocation {{allocation_name}} --showjson
+          register: vipu_partition_out
+          ignore_errors: true
+
+        - name: Partition removal block
+          block:
+            - name: Convert partition_out to list
+              ansible.builtin.set_fact:
+                vipu_partition_list: "{{ vipu_partition_out.stdout | from_json | community.general.json_query('partitions[*].id') | list }}"
+
+            - name: Remove partitions in our allocation
+              ansible.builtin.command:
+                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 remove partition {{ item }} --force
+              loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
+              register: partition_remove_out
+          when: vipu_partition_out.rc == 0
+
+        - name: Remove allocation
+          ansible.builtin.command:
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
+          register: allocation_remove_out
+
+        - name: Create the NEW allocation of requested size
+          ansible.builtin.command:
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
+          register: allocation_result
+
+      always:
+        - name: Fail if the allocation wasn't possible
+          ansible.builtin.fail:
+            msg: No allocations of size {{allocation_size}} available
+          when: '"no free allocation" in allocation_result.stderr'
+
+        - name: Create partition if user requested
+          block:
+            - name: Create partition
+              ansible.builtin.command:
+                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create partition {{user_partition}} --size {{allocation_size}} --allocation {{allocation_name}} --reconfigurable
+              register: vipu_part_mk
+              ignore_errors: yes
+
+            - name: Did we create the requested partition?
+              ansible.builtin.fail:
+                msg: Creating reconfigurable partition size {{allocation_size}} in {{allocation_name}}
+              when:
+                - vipu_alloc_mk.rc != 0
+          when:
+            - '"Single reconfigurable partition" in partition_choice'
+
+        - name: Copy clouds.yaml file
+          ansible.builtin.copy:
+            decrypt: yes
+            src: "{{playbook_dir}}/files/clouds-{{gc_cloud}}.yaml"
+            dest: "/etc/openstack/clouds.yaml"
+            mode: 0666
+
+        - name: Get allocation properties
+          ansible.builtin.command:
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
+          register: assigned_alloc_list
+
+        - name: List assigned IPUMs cos we need it for the truffle-shuffle
+          ansible.builtin.set_fact:
+            assigned_ipums_list: "{{ assigned_alloc_list.stdout | from_json |  moreati.jq.jq('.allocation.spec.agent_ids') }}"
+
+        - name: Shuffle IPUMs
+          ansible.builtin.include_role:
+            name: poplar_infra
+            tasks_from: truffleshuffle.yml
+
+        - name: Remove clouds.yaml file so next task runs as the Azimuth user
+          ansible.builtin.file:
+            state: absent
+            path: "/etc/openstack/clouds.yaml"
+
+        - name: Create the Poplar VM
+          ansible.builtin.include_role:
+            name: cluster_infra
+          vars:
+            image_name: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_name') | first }}"
+            image_tag: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_tag') | first }}"
       when: terraform_state == "present"
 
-
-- name: Create/Destroy the Poplar VM - always runs
+- name: Destroy the appliance
   hosts: openstack
-  roles:
-    - cluster_infra
-  vars:
-    image_name: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_name') | first }}"
-    image_tag: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_tag') | first }}"
-
-  post_tasks:
-    - name: Wait for Monitoring to become available
-      uri:
-        url: "http://{{ zenith_fqdn_monitoring }}"
-        method: GET
-        follow_redirects: safe
-      register: monitoring_uri
-      changed_when: false
-      failed_when: >-
-        monitoring_uri.status < 0 or
-        monitoring_uri.status == 404 or
-        monitoring_uri.status >= 500
-      retries: 60
-      delay: 10
-      # 404 and 503 are the statuses that are seen when the Zenith service is not ready yet
-      # An SSL error is indicated as -1, which will occur while cert-manager fetches certificates
-      until: monitoring_uri.status not in [404, 503, -1]
-      when: (cluster_state | default('present')) == 'present'
-      tags: never
-
-    - name: Wait for webconsole to become available
-      uri:
-        url: "http://{{ zenith_fqdn_webconsole }}"
-        method: GET
-        follow_redirects: safe
-      register: webconsole_uri
-      changed_when: false
-      failed_when: >-
-        webconsole_uri.status < 0 or
-        webconsole_uri.status == 404 or
-        webconsole_uri.status >= 500
-      retries: 60
-      delay: 10
-      # 404 and 503 are the statuses that are seen when the Zenith service is not ready yet
-      # An SSL error is indicated as -1, which will occur while cert-manager fetches certificates
-      until: webconsole_uri.status not in [404, 503, -1]
-      when: (cluster_state | default('present')) == 'present'
-      tags: never
-
-
-- name: Destroy the frontend (needs super powers)
-  hosts: openstack
-  vars:
-    allocation_name: "{{ allocation_name }}"
-    appliance_user: "{{ appliance_user }}"
-    appliance_project: "{{ appliance_project }}"
-    appliance_tenancy: "{{ appliance_tenancy }}"
-    terraform_state: "{{ terraform_state }}"
+#  vars:
+#    allocation_name: "{{ allocation_name }}"
+#    appliance_user: "{{ appliance_user }}"
+#    appliance_project: "{{ appliance_project }}"
+#    appliance_tenancy: "{{ appliance_tenancy }}"
+#    terraform_state: "{{ terraform_state }}"
   tasks:
-    - name: Include poplar infra role
-      ansible.builtin.include_role:
-        name: poplar_infra
-        tasks_from: "absent.yml"
+    - name: Destroy the appliance
+      block:
+        - name: Test if appliance VM exists
+          ansible.builtin.shell:
+            cmd: openstack server list --name {{cluster_name}}
+          register: vm_query
+
+        - name: Remove the Poplar VM, if it exists
+          ansible.builtin.include_role:
+            name: cluster_infra
+          vars:
+            image_name: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_name') | first }}"
+            image_tag: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_tag') | first }}"
+          when: '"{{cluster_name}}" in vm_query.stdout'
+
+        # This is flakey, if allocation_name isn't known it throws an error so we
+        # check the error condition before trying to execute the following block.
+        - name: List partitions in our allocation (only)
+          ansible.builtin.command:
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 list partitions --allocation {{allocation_name}} --showjson
+          register: vipu_partition_out
+          ignore_errors: true
+
+        - name: Partition removal block
+          block:
+            - name: Convert partition_out to list
+              ansible.builtin.set_fact:
+                vipu_partition_list: "{{ vipu_partition_out.stdout | from_json | community.general.json_query('partitions[*].id') | list }}"
+
+            - name: Remove partitions in our allocation
+              ansible.builtin.command:
+                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 remove partition {{ item }} --force
+              loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
+              register: partition_remove_out
+          # End block
+          when: vipu_partition_out.rc == 0
+
+        - name: List allocation - the return code shows if the expected alloc exists
+          ansible.builtin.command:
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
+          register: vipu_alloc_list
+          ignore_errors: true
+
+        - name: Remove allocation block
+          block:
+            - name: List assigned IPUMs cos we need it for the truffle-shuffle
+              ansible.builtin.set_fact:
+                assigned_ipums_list: "{{ vipu_alloc_list.stdout | from_json |  moreati.jq.jq('.allocation.spec.agent_ids') }}"
+
+            - name: Remove allocation
+              ansible.builtin.command:
+                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
+              register: allocation_remove_out
+
+            - name: Copy clouds.yaml file
+              ansible.builtin.copy:
+                decrypt: yes
+                src: "{{playbook_dir}}/files/clouds-{{gc_cloud}}.yaml"
+                dest: "/etc/openstack/clouds.yaml"
+                mode: 0666
+
+            # Remove the IPUMs in assigned_ipums_list from the user's vpod
+            - name: Shuffle IPUMs back to staging
+              ansible.builtin.include_role:
+                name: poplar_infra
+                tasks_from: truffleshuffle.yml
+
+            - name: Remove clouds.yaml file so next play runs as the Azimuth user
+              ansible.builtin.file:
+                state: absent
+                path: "/etc/openstack/clouds.yaml"
+              # End block cleaning up allocations
+          when: vipu_alloc_list.rc == 0
+
+      # End block
       when: terraform_state == "absent"
-
-
-- hosts: localhost
-  tasks:
-    - name: debug inventory
-      debug: var=hostvars
 
 # Write the outputs as the final task
 - hosts: localhost
