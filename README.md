@@ -28,3 +28,6 @@ azimuth_caas_awx_extra_projects:
         # TBC:
         cluster_image: "{{ community_images_image_ids.ubuntu20.04-poplar }}"
 ```
+The Graphcore logo (assets/graphcore.png) is a registered trademark and cannot be used without written authorization from Graphcore.
+ 
+Everything else in this repository is licensed under the Apache License, version 2.0.
