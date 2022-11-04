@@ -142,22 +142,6 @@
             msg: No allocations of size {{allocation_size}} available
           when: '"no free allocation" in allocation_result.stderr'
 
-        - name: Create partition if user requested
-          block:
-            - name: Create partition
-              ansible.builtin.command:
-                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create partition {{user_partition}} --size {{allocation_size}} --allocation {{allocation_name}} --reconfigurable
-              register: vipu_part_mk
-              ignore_errors: yes
-
-            - name: Did we create the requested partition?
-              ansible.builtin.fail:
-                msg: Creating reconfigurable partition size {{allocation_size}} in {{allocation_name}}
-              when:
-                - vipu_part_mk.rc != 0
-          when:
-            - '"Single reconfigurable partition" in partition_choice'
-
         - name: Copy clouds.yaml file
           ansible.builtin.copy:
             decrypt: yes
@@ -178,6 +162,22 @@
           ansible.builtin.include_role:
             name: poplar_infra
             tasks_from: truffleshuffle.yml
+
+        - name: Create partition if user requested
+          block:
+            - name: Create partition
+              ansible.builtin.command:
+                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create partition {{user_partition}} --size {{allocation_size}} --allocation {{allocation_name}} --reconfigurable
+              register: vipu_part_mk
+              ignore_errors: yes
+
+            - name: Did we create the requested partition?
+              ansible.builtin.fail:
+                msg: Creating reconfigurable partition size {{allocation_size}} in {{allocation_name}}
+              when:
+                - vipu_part_mk.rc != 0
+          when:
+            - '"Single reconfigurable partition" in partition_choice'
 
         - name: Remove clouds.yaml file so next task runs as the Azimuth user
           ansible.builtin.file:
