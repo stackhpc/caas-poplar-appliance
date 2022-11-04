@@ -46,7 +46,9 @@
     - name: Check allocation size is multiple of 4
       ansible.builtin.fail:
         msg: The IPU count must be a multiple of 4
-      when: allocation_size | int % 4 != 0
+      when: 
+        - terraform_state == "present" 
+        - allocation_size | int % 4 != 0
 
     - name: Set allocation name
       ansible.builtin.set_fact:
