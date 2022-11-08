@@ -22,11 +22,15 @@ parameters:
     label: "Number of IPUs in allocation (<=64)"
     description: |-
       The number of IPUs to be added to allocation.
-    kind: integer
-    default: 16
+    kind: choice
+    default: 4
     options:
-      min: 4
-      max: 64
+      choices:
+        - 4
+        - 8
+        - 16
+        - 32
+        - 64
     immutable: true
 
   - name: partition_choice
@@ -64,7 +68,7 @@ parameters:
 usage_template: |-
   {% set webconsole = cluster | service("webconsole") %}
   {% set monitoring = cluster | service("monitoring") %}
-  This Poplar appliance ({{cluster.outputs.cluster_operating_system}} size {{cluster.outputs.cluster_flavour_name}}) may be accessed in a web browser via the [Web console service]({{ webconsole.url }}) and by SSH.  The SSH key of the user that deployed the appliance is injected into a user account with the same name.
+  This Poplar appliance ({{cluster.outputs.cluster_operating_system}} size {{cluster.outputs.cluster_flavour_name}}) may be accessed in a web browser via the [Web console service]({{ webconsole.url }}) and by SSH.  SSH keys used are those in the Graphcore LDAP service. SSH is configured to allow login only by the appliance creator and Cloud Development engineers. Further users may be enabled by adding them to the `ipupod` group. The web console logs in as user `ipuuser` automatically.
 
   SSH access example:
 
