@@ -2,103 +2,144 @@
 # This task list configures user-defined partitions, Azimuth-defined allocation
 # and IPUMs when the Poplar Appliance is created (terraform_state == present)
 
-- name: Copy clouds.yaml file
-  ansible.builtin.copy:
-    decrypt: yes
-    src: "{{playbook_dir}}/files/clouds-{{gc_cloud}}.yaml"
-    dest: "/etc/openstack/clouds.yaml"
-    mode: 0666
-
-- name: Get clouds.yaml file for debug
-  ansible.builtin.slurp:
-    src: "/etc/openstack/clouds.yaml"
-  register: slurpfile
-  tags: [ debug, never ]
-
-- name: Debug clouds.yaml file
-  ansible.builtin.debug:
-    msg: "{{ slurpfile['content'] | b64decode }}"
-  tags: [ debug, never ]
-
-- name: Debug EE environment
-  ansible.builtin.command: /usr/bin/env
-  register: env_out
-  tags: [ debug, never ]
-
-- name: Debug EE environment
-  ansible.builtin.debug:
-    msg: "Environment is {{env_out}}"
-  tags: [ debug, never ]
-
-- name: Can we get an allocation of requested size?
-  ansible.builtin.command:
-    cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation --options --size {{allocation_size}}
-  ignore_errors: yes
-  register: vipu_alloc_opt
-
-- name: Debug allocation test
-  ansible.builtin.debug:
-    var: vipu_alloc_opt
-  tags: [ debug, never ]
-
-- name: Do we have any options
-  ansible.builtin.fail:
-    msg: No allocations of size {{allocation_size}} available
-  when:
-    - vipu_alloc_opt.rc != 0
-    - '"no free allocation" in vipu_alloc_opt.stderr'
-
-- name: Create allocation
-  ansible.builtin.command:
-    cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
-  register: vipu_alloc_mk
-
-- name: Debug vipu-admin output
-  ansible.builtin.debug:
-    var: vipu_alloc_mk
-  when:
-    - vipu_alloc_mk is defined
-  tags: [ debug, never ]
-
-- name: Get allocation properties
-  ansible.builtin.command:
-    cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
-  register: assigned_alloc
-
-- name: List assigned IPUMs
-  ansible.builtin.set_fact:
-    assigned_ipums_list: "{{ assigned_alloc.stdout | from_json |  moreati.jq.jq('.allocation.spec.agent_ids') }}"
-
-- name: Debug vipu-admin list
-  ansible.builtin.debug:
-    var: assigned_ipums_list
-  when:
-    - assigned_ipums_list is defined
-
-- name: Create partition if user requested
+- name: Build the appliance when terraform_state is present
   block:
-    - name: Create partition name
-      ansible.builtin.set_fact:
-        user_partition: "{{allocation_name}}-reconfig"
-
-    - name: Create partition
+      # This creation can fail because:
+      # 1. There aren't enough free IPUMs
+      # 2. The allocation already exists
+    - name: Create the allocation of requested size
       ansible.builtin.command:
-        cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create partition {{user_partition}} --size {{allocation_size}} --allocation {{allocation_name}} --reconfigurable
-      register: vipu_part_mk
-      ignore_errors: yes
-
-    - name: Did we create the requested partition?
+        cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
+      register: allocation_result
+  rescue:
+    - name: Fail if there simply is not enough space
       ansible.builtin.fail:
-        msg: Creating reconfigurable partition size {{allocation_size}} in {{allocation_name}}
+        msg: No allocations of size {{allocation_size}} available
+      when: '"no free allocation" in allocation_result.stderr'
+
+    # So here we must have an allocation, which per SYSOP-1090 we must
+    # delete. But the allocation might have partitions, so we need to
+    # list and delete those
+    - name: List partitions in our allocation
+      ansible.builtin.command:
+        cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 list partitions --allocation {{allocation_name}} --showjson
+      register: vipu_partition_out
+      ignore_errors: true
+
+    - name: Partition removal block
+      block:
+        - name: Convert partition_out to list
+          ansible.builtin.set_fact:
+            vipu_partition_list: "{{ vipu_partition_out.stdout | from_json | community.general.json_query('partitions[*].id') | list }}"
+
+        - name: Remove partitions in our allocation
+          ansible.builtin.command:
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove partition {{ item }} --force
+          loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
+          register: partition_remove_out
+      when: vipu_partition_out.rc == 0
+
+    - name: Remove allocation
+      ansible.builtin.command:
+        cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
+      register: allocation_remove_out
+
+    - name: Create the NEW allocation of requested size
+      ansible.builtin.command:
+        cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
+      register: allocation_result
+
+  always:
+    - name: Fail if the allocation wasn't possible
+      ansible.builtin.fail:
+        msg: No allocations of size {{allocation_size}} available
+      when: '"no free allocation" in allocation_result.stderr'
+
+    - name: Copy clouds.yaml file
+      ansible.builtin.copy:
+        decrypt: yes
+        src: "{{playbook_dir}}/files/clouds-{{gc_cloud}}.yaml"
+        dest: "/etc/openstack/clouds.yaml"
+        mode: 0666
+
+    - name: Get ID of common_ctrl network
+      openstack.cloud.networks_info:
+        cloud: openstack
+        name: azimuth-vpod-common-ctrl
+      register: ctrl_result
+      environment:
+        OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+
+    - name: Debug ctrl_network result
+      ansible.builtin.debug:
+        msg: "Ctrl network output {{ ctrl_result }}"
+
+    # Ensure azimuth-vpod-common-ctrl RBAC policy exists
+    - name: Create a new network RBAC policy
+      openstack.cloud.neutron_rbac_policy:
+        object_id: "{{ ctrl_result.openstack_networks[0].id}}"
+        object_type: 'network'
+        target_project_id: "{{appliance_project}}"
+        project_id: "{{ctrl_result.openstack_networks[0].project_id}}"
+        cloud: openstack
+        action: "access_as_shared"
+        state: present
+      environment:
+        OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+
+    - name: Get ID of common_storage network
+      openstack.cloud.networks_info:
+        cloud: openstack
+        name: azimuth-vpod-common-storage
+      register: storage_result
+      environment:
+        OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+
+    # Ensure azimuth-vpod-common-storage RBAC policy exists
+    - name: Create a new network RBAC policy
+      openstack.cloud.neutron_rbac_policy:
+        object_id: "{{ storage_result.openstack_networks[0].id}}"
+        object_type: 'network'
+        target_project_id: "{{appliance_project}}"
+        project_id: "{{storage_result.openstack_networks[0].project_id}}"
+        cloud: openstack
+        action: "access_as_shared"
+        state: present
+      environment:
+        OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+
+    - name: Get allocation properties
+      ansible.builtin.command:
+        cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
+      register: assigned_alloc_list
+
+    - name: List assigned IPUMs cos we need it for the truffle-shuffle
+      ansible.builtin.set_fact:
+        assigned_ipums_list: "{{ assigned_alloc_list.stdout | from_json |  moreati.jq.jq('.allocation.spec.agent_ids') }}"
+
+    - name: Shuffle IPUMs
+      ansible.builtin.include_role:
+        name: poplar_infra
+        tasks_from: truffleshuffle.yml
+
+    - name: Create partition if user requested
+      block:
+        - name: Create partition
+          ansible.builtin.command:
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create partition {{user_partition}} --size {{allocation_size}} --allocation {{allocation_name}} --reconfigurable
+          register: vipu_part_mk
+          ignore_errors: yes
+
+        - name: Did we create the requested partition?
+          ansible.builtin.fail:
+            msg: Creating reconfigurable partition size {{allocation_size}} in {{allocation_name}}
+          when:
+            - vipu_part_mk.rc != 0
       when:
-        - vipu_alloc_mk.rc != 0
-  when:
-    - '"Single reconfigurable partition" in partition_choice'
+        - '"Single reconfigurable partition" in partition_choice'
 
-- name: Shuffle IPUMs
-  ansible.builtin.import_tasks: truffleshuffle.yml
+    - name: Remove clouds.yaml file so next task runs as the Azimuth user
+      ansible.builtin.file:
+        state: absent
+        path: "/etc/openstack/clouds.yaml"
 
-- name: Remove clouds.yaml file so next play runs as the Azimuth user
-  ansible.builtin.file:
-    state: absent
-    path: "/etc/openstack/clouds.yaml"

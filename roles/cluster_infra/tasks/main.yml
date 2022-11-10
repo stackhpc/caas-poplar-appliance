@@ -92,6 +92,12 @@
     msg: "{{ slurpfile['content'] | b64decode }}"
   tags: [ debug, never ]
 
+- name: Test if appliance VM exists
+  ansible.builtin.shell:
+    cmd: openstack server list --name {{cluster_name}}
+  register: vm_query
+  when: terraform_state == 'absent'
+
 - name: Provision infrastructure
   community.general.terraform:
     binary_path: "{{ terraform_binary_path }}"
@@ -101,6 +107,7 @@
     force_init: yes
     init_reconfigure: yes
   register: terraform_provision
+  when: (terraform_state == 'present') or (terraform_state == 'absent' and "cluster_name in vm_query.stdout")
 
 - name: Populate facts from Terraform outputs
   set_fact:
@@ -109,7 +116,3 @@
     cluster_flavour_name: "{{ terraform_provision.outputs.cluster_flavour_name.value }}"
   when:
     - terraform_state == "present"
-
-#- name: Provision infrastructure a la sample appliance
-#  include_role:
-#    name: stackhpc.terraform.infra
