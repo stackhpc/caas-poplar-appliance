@@ -14,7 +14,7 @@
 
     - name: Set user name
       ansible.builtin.set_fact:
-        appliance_user: "{{ openstack_cli_user.stdout | default( 'ipuuser') }}"
+        appliance_user: "{{ (openstack_cli_user.stdout | split('@') | first) if '@' in openstack_cli_user.stdout else openstack_cli_user.stdout }}"
 
     - name: Get user's openstack project ID
       ansible.builtin.shell:
@@ -39,15 +39,15 @@
         cmd: openstack project show {{ appliance_tenancy }} -f json -c tags
       register: openstack_cloud_name
 
-    - name: Extract cloud name
-      ansible.builtin.set_fact:
-        gc_cloud: "{{ openstack_cloud_name.stdout | from_json | json_query('tags[0]') | replace('-','_') }}"
+#    - name: Extract cloud name
+#      ansible.builtin.set_fact:
+#        gc_cloud: "{{ openstack_cloud_name.stdout | from_json | json_query('tags[0]') | replace('-','_') }}"
 
     - name: Check allocation size is multiple of 4
       ansible.builtin.fail:
         msg: The IPU count must be a multiple of 4
-      when: 
-        - terraform_state == "present" 
+      when:
+        - terraform_state == "present"
         - allocation_size | int % 4 != 0
 
     - name: Set allocation name
@@ -69,22 +69,6 @@
         - "{{playbook_dir}}/group_vars/{{gc_cloud}}.yaml"
         - "{{playbook_dir}}/group_vars/ipums.yaml"
 
-    - name: Get ldap uid for appliance user
-      community.general.ldap_search:
-        bind_dn: "{{ ldap_binddn }}"
-        bind_pw: "{{ ldap_auth_token }}"
-        filter: "(&(objectClass=posixAccount)(uid={{appliance_user}}))"
-        scope: subordinate
-        attrs:
-          - "uidNumber"
-        dn: "{{ldap_base}}"
-        server_uri: "{{ldap_uri}}"
-      register: ldap_out
-      delegate_to: localhost
-
-    - name: Set uid fact for use in cluster_infra
-      ansible.builtin.set_fact:
-        appliance_user_ldap_uid: "{{ ldap_out.results[0].uidNumber | int }}"
 
 - name: Build the appliance
   hosts: openstack
@@ -96,7 +80,7 @@
           # 2. The allocation already exists
         - name: Create the allocation of requested size
           ansible.builtin.command:
-            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
           register: allocation_result
       rescue:
         - name: Fail if there simply is not enough space
@@ -109,7 +93,7 @@
         # list and delete those
         - name: List partitions in our allocation
           ansible.builtin.command:
-            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 list partitions --allocation {{allocation_name}} --showjson
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 list partitions --allocation {{allocation_name}} --showjson
           register: vipu_partition_out
           ignore_errors: true
 
@@ -121,19 +105,19 @@
 
             - name: Remove partitions in our allocation
               ansible.builtin.command:
-                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 remove partition {{ item }} --force
+                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove partition {{ item }} --force
               loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
               register: partition_remove_out
           when: vipu_partition_out.rc == 0
 
         - name: Remove allocation
           ansible.builtin.command:
-            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
           register: allocation_remove_out
 
         - name: Create the NEW allocation of requested size
           ansible.builtin.command:
-            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
           register: allocation_result
 
       always:
@@ -149,9 +133,67 @@
             dest: "/etc/openstack/clouds.yaml"
             mode: 0666
 
+        - name: Get ID of common_ctrl network
+          openstack.cloud.networks_info:
+            cloud: openstack
+            name: azimuth-vpod-common-ctrl
+          register: ctrl_result
+          environment:
+            OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+
+        - name: Debug ctrl_network result
+          ansible.builtin.debug:
+            msg: "Ctrl network output {{ ctrl_result }}"
+
+#        - name: Set fact with common_ctrl ID
+#          ansible.builtin.set_fact:
+#            azimuth_vpod_common_ctrl: "{{ ctrl_result.openstack_networks[0].id}}"
+
+        # Ensure azimuth-vpod-common-ctrl RBAC policy exists
+        - name: Create a new network RBAC policy
+          openstack.cloud.neutron_rbac_policy:
+            object_id: "{{ ctrl_result.openstack_networks[0].id}}"
+            object_type: 'network'
+            target_project_id: "{{appliance_project}}"
+            project_id: "{{ctrl_result.openstack_networks[0].project_id}}"
+            cloud: openstack
+            action: "access_as_shared"
+            state: present
+          environment:
+            OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+
+        - name: Get ID of common_storage network
+          openstack.cloud.networks_info:
+            cloud: openstack
+            name: azimuth-vpod-common-storage
+          register: storage_result
+          environment:
+            OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+
+        # Ensure azimuth-vpod-common-storage RBAC policy exists
+        - name: Create a new network RBAC policy
+          openstack.cloud.neutron_rbac_policy:
+            object_id: "{{ storage_result.openstack_networks[0].id}}"
+            object_type: 'network'
+            target_project_id: "{{appliance_project}}"
+            project_id: "{{storage_result.openstack_networks[0].project_id}}"
+            cloud: openstack
+            action: "access_as_shared"
+            state: present
+          environment:
+            OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+
+#        - name: Set fact with common_storage ID
+#          ansible.builtin.set_fact:
+#            azimuth_vpod_common_storage: "{{ storage_result.openstack_networks[0].id}}"
+
+#        - name: Set fact with backend tenancy ID
+#          ansible.builtin.set_fact:
+#            azimuth_backend_tenancy: "{{ storage_result.openstack_networks[0].project_id}}"
+
         - name: Get allocation properties
           ansible.builtin.command:
-            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
           register: assigned_alloc_list
 
         - name: List assigned IPUMs cos we need it for the truffle-shuffle
@@ -167,7 +209,7 @@
           block:
             - name: Create partition
               ansible.builtin.command:
-                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create partition {{user_partition}} --size {{allocation_size}} --allocation {{allocation_name}} --reconfigurable
+                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create partition {{user_partition}} --size {{allocation_size}} --allocation {{allocation_name}} --reconfigurable
               register: vipu_part_mk
               ignore_errors: yes
 
@@ -220,7 +262,7 @@
         # check the error condition before trying to execute the following block.
         - name: List partitions in our allocation (only)
           ansible.builtin.command:
-            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 list partitions --allocation {{allocation_name}} --showjson
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 list partitions --allocation {{allocation_name}} --showjson
           register: vipu_partition_out
           ignore_errors: true
 
@@ -232,7 +274,7 @@
 
             - name: Remove partitions in our allocation
               ansible.builtin.command:
-                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 remove partition {{ item }} --force
+                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove partition {{ item }} --force
               loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
               register: partition_remove_out
           # End block
@@ -240,7 +282,7 @@
 
         - name: List allocation - the return code shows if the expected alloc exists
           ansible.builtin.command:
-            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
+            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
           register: vipu_alloc_list
           ignore_errors: true
 
@@ -252,7 +294,7 @@
 
             - name: Remove allocation
               ansible.builtin.command:
-                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers[appliance_tenancy]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
+                cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
               register: allocation_remove_out
 
             - name: Copy clouds.yaml file
@@ -285,10 +327,10 @@
       vars:
         outputs:
           cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_access_ip }}"
-          cluster_user: "{{ hostvars[groups['openstack'][0]].cluster_user }}"
+          cluster_user: "{{ hostvars[groups['openstack'][0]].appliance_user }}"
           cluster_flavour_name: "{{ hostvars[groups['openstack'][0]].cluster_flavour_name }}"
           cluster_operating_system: "{{ hostvars[groups['openstack'][0]].operating_system }}"
           allocation_name: "{{ hostvars[groups['openstack'][0]].allocation_name }}"
           allocation_size: "{{ hostvars[groups['openstack'][0]].allocation_size }}"
           ipuof_vipu_api_partition_id: "{{ hostvars[groups['openstack'][0]].user_partition | default('none') }}"
-          ipuof_vipu_api_host: "{{ hostvars[groups['openstack'][0]].vipu_servers[appliance_tenancy]['ctrl_net_ip'] }}"
+          ipuof_vipu_api_host: "{{ hostvars[groups['openstack'][0]].vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['ctrl_net_ip'] }}"

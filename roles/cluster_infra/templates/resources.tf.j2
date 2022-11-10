@@ -217,7 +217,6 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     zenith_sshd_port = "{{ zenith_sshd_port }}"
     azimuth_cloud_name = "notused"
     azimuth_user_name = "{{appliance_user}}"
-    azimuth_user_uid = "{{appliance_user_ldap_uid}}"
     azimuth_user_id = "${data.openstack_identity_auth_scope_v3.scope.user_id}"
     azimuth_project_name = "${data.openstack_identity_auth_scope_v3.scope.project_name}"
     azimuth_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
@@ -226,8 +225,8 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     allocation_name = "{{ allocation_name }}"
     allocation_size = "{{ allocation_size }}"
     partition_name  = "{{ user_partition  }}"
-    vipu_ipaddr     = "{{ vipu_servers[appliance_tenancy]['ctrl_net_ip'] }}"
-    vipu_port       = "{{ vipu_servers[appliance_tenancy]['vipu_port'] }}"
+    vipu_ipaddr     = "{{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['ctrl_net_ip'] }}"
+    vipu_port       = "{{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['vipu_port'] }}"
     ldap_auth_token = "{{ ldap_auth_token }}"
   }
 
