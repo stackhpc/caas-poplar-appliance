@@ -9,7 +9,7 @@
       # 2. The allocation already exists
     - name: Create the allocation of requested size
       ansible.builtin.command:
-        cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
+        cmd: vipu-admin{{vipu_ver}} -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
       register: allocation_result
   rescue:
     - name: Fail if there simply is not enough space
@@ -22,7 +22,7 @@
     # list and delete those
     - name: List partitions in our allocation
       ansible.builtin.command:
-        cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 list partitions --allocation {{allocation_name}} --showjson
+        cmd: vipu-admin{{vipu_ver}}  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 list partitions --allocation {{allocation_name}} --showjson
       register: vipu_partition_out
       ignore_errors: true
 
@@ -34,19 +34,19 @@
 
         - name: Remove partitions in our allocation
           ansible.builtin.command:
-            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove partition {{ item }} --force
+            cmd: vipu-admin{{vipu_ver}}  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove partition {{ item }} --force
           loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
           register: partition_remove_out
       when: vipu_partition_out.rc == 0
 
     - name: Remove allocation
       ansible.builtin.command:
-        cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
+        cmd: vipu-admin{{vipu_ver}}  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
       register: allocation_remove_out
 
     - name: Create the NEW allocation of requested size
       ansible.builtin.command:
-        cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
+        cmd: vipu-admin{{vipu_ver}} -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create allocation {{allocation_name}} --size {{allocation_size}}
       register: allocation_result
 
   always:
@@ -110,7 +110,7 @@
 
     - name: Get allocation properties
       ansible.builtin.command:
-        cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
+        cmd: vipu-admin{{vipu_ver}} -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
       register: assigned_alloc_list
 
     - name: List assigned IPUMs cos we need it for the truffle-shuffle
@@ -126,7 +126,7 @@
       block:
         - name: Create partition
           ansible.builtin.command:
-            cmd: /opt/gc/vipu-{{vipu_ver}}/vipu-admin -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create partition {{user_partition}} --size {{allocation_size}} --allocation {{allocation_name}} --reconfigurable
+            cmd: vipu-admin{{vipu_ver}} -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson create partition {{user_partition}} --size {{allocation_size}} --allocation {{allocation_name}} --reconfigurable
           register: vipu_part_mk
           ignore_errors: yes
 
