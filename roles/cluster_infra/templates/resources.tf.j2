@@ -179,11 +179,19 @@ resource "openstack_compute_instance_v2" "cluster_server" {
           UseDNS=false
       - path: /etc/motd
         content: |
-           ***************************************************************************
-           * This appliance is provided and maintained by Cloud Development, not IT. *
-           * If you have any questions, concerns, or suggestions for enhancements.   *
-           * please contact #help-gbnwp-cl1 or email: cloud-development@graphcore.ai *
-           ***************************************************************************
+           ##############################################################################
+           #                                                                            #
+           #  This appliance, and the infrastructure that supports it, is provided and  #
+           #  maintained by the Cloud Development Team. IT have no responsibility for   #
+           #  this system, and will not be able to help you.                            #
+           #                                                                            #
+           #  If you have any questions, concerns, or suggestions for enhancement,      #
+           #  please contact:                                                           #
+           #                                                                            #
+           #    Slack: #help-gbnwp-cl1                                                  #
+           #    Email: cloud-development@graphcore.ai                                   #
+           #                                                                            #
+           ##############################################################################
       - path: /etc/ceph/cephfsnethome.secret
         owner: root:root
         permissions: 0600
