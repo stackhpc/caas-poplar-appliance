@@ -1,9 +1,6 @@
 ---
 # Goonies never say die
 #
-- name: Install Terraform binary
-  include_role:
-    name: stackhpc.terraform.install
 
 - name: Make Terraform project directory
   file:
