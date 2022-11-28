@@ -1,4 +1,3 @@
----
 - name: Log appliance name
   ansible.builtin.debug:
     msg: "Building appliance {{cluster_name}}"
@@ -44,7 +43,9 @@
 
 - name: Include the vars we need
   ansible.builtin.include_vars:
-    file: "{{ item }}"
+    file: "{{ var_inc_var }}"
   loop:
     - "{{playbook_dir}}/group_vars/{{gc_cloud}}.yaml"
     - "{{playbook_dir}}/group_vars/ipums.yaml"
+  loop_control:
+    loop_var: var_inc_var

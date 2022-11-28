@@ -1,6 +1,4 @@
 # Modified by Graphcore Ltd.
----
-
 # Convert the floating IP id to an address for Terraform
 - block:
     - name: Look up floating ip
@@ -70,23 +68,25 @@
 
 - name: Template Terraform files into project directory
   template:
-    src: "{{ item }}.j2"
-    dest: "{{ terraform_project_path }}/{{ item }}"
+    src: "{{ tf_var_cluster }}.j2"
+    dest: "{{ terraform_project_path }}/{{ tf_var_cluster }}"
   loop:
     - outputs.tf
     - providers.tf
     - resources.tf
+  loop_control:
+    loop_var: tf_var_cluster
 
 - name: Get resources.tf for debug
   ansible.builtin.slurp:
     src: "{{ terraform_project_path }}/resources.tf"
   register: slurpfile
-  tags: [ debug, never ]
+  tags: [debug, never]
 
 - name: Debug resources.tf file
   ansible.builtin.debug:
     msg: "{{ slurpfile['content'] | b64decode }}"
-  tags: [ debug, never ]
+  tags: [debug, never]
 
 - name: Test if appliance VM exists
   ansible.builtin.shell:

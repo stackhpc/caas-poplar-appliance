@@ -4,7 +4,6 @@ name: "poplar-appliance"
 label: "Graphcore Poplar Appliance"
 description: Poplar host accessible via a web browser and by LDAP SSH.
 logo: https://raw.githubusercontent.com/graphcore/caas-poplar-appliance/main/assets/graphcore.png
-
 parameters:
   - name: operating_system
     label: "Select operating system"
@@ -31,7 +30,7 @@ parameters:
         - 16
         - 32
         - 64
-    immutable: true
+    immutable: false
 
   - name: partition_choice
     label: "Create a partition in the allocation, or not?"
@@ -64,17 +63,15 @@ parameters:
     options:
       min: 10
     immutable: true
-
 usage_template: |-
   {% set webconsole = cluster | service("webconsole") %}
   {% set monitoring = cluster | service("monitoring") %}
   This Poplar appliance ({{cluster.outputs.cluster_operating_system}} size {{cluster.outputs.cluster_flavour_name}}) may be accessed in a web browser via the [Web console service]({{ webconsole.url }}) and by SSH.  SSH keys used are those in the Graphcore LDAP service. SSH is configured to allow login only by the appliance creator and Cloud Development engineers. Further users may be enabled by adding them to the `ipupod` group. The web console logs in as user `ipuuser` automatically.
 
-  SSH access example:
+  You may copy this command to access your instance:
 
   ```
   $ ssh {{ cluster.outputs.cluster_user | default("ubuntu") }}@{{ cluster.outputs.cluster_access_ip | default("[cluster ip]") }}
-  {{ cluster.outputs.cluster_user | default("ubuntu")}}@{{ cluster.name }}:~$
   ```
 
   The following environment variables have been set in the appliance:
@@ -92,12 +89,11 @@ usage_template: |-
   including any packages that have been installed using `apt`.
 
   Monitoring dashboards for the appliance are available using the [Monitoring service]({{ monitoring.url }}).
-
-
 services:
   - name: webconsole
     label: Web console
     icon_url: https://dyltqmyl993wv.cloudfront.net/assets/stacks/guacamole/img/guacamole-stack-220x234.png
+
   - name: monitoring
     label: Monitoring
     icon_url: https://raw.githubusercontent.com/cncf/artwork/master/projects/prometheus/icon/color/prometheus-icon-color.png

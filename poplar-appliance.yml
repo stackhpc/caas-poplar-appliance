@@ -1,6 +1,4 @@
 # Modified and renamed by Graphcore Ltd.
----
-
 - name: Create or destroy appliance
   hosts: openstack
   vars:
@@ -11,11 +9,14 @@
       - "{{ (terraform_state == 'present') | ternary('poplar_infra','') }}"
       - "{{ (terraform_state == 'present' or terraform_state == 'absent') | ternary('cluster_infra','') }}"
       - "{{ (terraform_state == 'absent' ) | ternary('poplar_infra','') }}"
+
   tasks:
     - name: Include the roles needed
       ansible.builtin.include_role:
-        name: "{{ item }}"
+        name: "{{ role_var }}"
       loop: "{{ execution_order | select | list }}"
+      loop_control:
+        loop_var: role_var
 
 # Write the outputs as the final task
 - hosts: localhost
