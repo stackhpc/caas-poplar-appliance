@@ -5,7 +5,8 @@
 # check the error condition before trying to execute the following block.
 - name: List partitions in our allocation (only)
   ansible.builtin.command:
-    cmd: vipu-admin{{vipu_ver}}  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 list partitions --allocation {{allocation_name}} --showjson
+    cmd: vipu-admin{{vipu_ver}}  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P {{ vipu_container_admin_port }} list partitions --allocation {{allocation_name}} --showjson
+  when: allocation_size | int > 0
   register: vipu_partition_out
   ignore_errors: true
 
@@ -14,20 +15,24 @@
     - name: Convert partition_out to list
       ansible.builtin.set_fact:
         vipu_partition_list: "{{ vipu_partition_out.stdout | from_json | community.general.json_query('partitions[*].id') | list }}"
+      when: vipu_partition_out.rc == 0
 
     - name: Remove partitions in our allocation
       ansible.builtin.command:
-        cmd: vipu-admin{{vipu_ver}}  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove partition {{ part_var }} --force
+        cmd: vipu-admin{{vipu_ver}}  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P {{ vipu_container_admin_port }} remove partition {{ part_var }} --force
       loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
       loop_control:
         loop_var: part_var
       register: partition_remove_out
+      when: vipu_partition_list is iterable
   # End block
-  when: vipu_partition_out.rc == 0
+  when:
+    - allocation_size | int > 0
 
 - name: List allocation - the return code shows if the expected alloc exists
   ansible.builtin.command:
     cmd: vipu-admin{{vipu_ver}} -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
+  when: allocation_size | int > 0
   register: vipu_alloc_list
   ignore_errors: true
 
@@ -36,6 +41,7 @@
     - name: List assigned IPUMs cos we need it for the truffle-shuffle
       ansible.builtin.set_fact:
         assigned_ipums_list: "{{ vipu_alloc_list.stdout | from_json |  moreati.jq.jq('.allocation.spec.agent_ids') }}"
+      when: vipu_alloc_list.rc == 0
 
     - name: Remove allocation
       ansible.builtin.command:
@@ -45,14 +51,14 @@
     - name: Copy clouds.yaml file
       ansible.builtin.copy:
         decrypt: yes
-        src: "{{playbook_dir}}/files/clouds-{{gc_cloud}}.yaml"
+        src: "{{playbook_dir}}/files/clouds-{{gc_tenancy | default(gc_cloud)}}.yaml"
         dest: "/etc/openstack/clouds.yaml"
         mode: 0666
 
     # Remove the IPUMs in assigned_ipums_list from the user's vpod
     - name: Shuffle IPUMs back to staging
       ansible.builtin.include_role:
-        name: poplar_infra
+        name: ipum_infra
         tasks_from: truffleshuffle.yml
 
     - name: Remove clouds.yaml file so next play runs as the Azimuth user
@@ -60,4 +66,5 @@
         state: absent
         path: "/etc/openstack/clouds.yaml"
         # End block cleaning up allocations
-  when: vipu_alloc_list.rc == 0
+  when:
+    - allocation_size | int > 0
