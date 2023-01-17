@@ -1,6 +1,10 @@
+- name: Define the terraform state
+  ansible.builtin.set_fact:
+    terraform_state: "{{ cluster_state | default('present') }}"
+
 - name: Log appliance name
   ansible.builtin.debug:
-    msg: "Building appliance {{cluster_name}}"
+    msg: "{{(terraform_state == 'present') | ternary ('Building','Destroying')}} appliance {{cluster_name}} of type {{cluster_type}} & ID {{cluster_id}}"
 
 - name: Include the vars we need
   ansible.builtin.include_vars:
@@ -42,9 +46,9 @@
   ansible.builtin.set_fact:
     allocation_name: "{{cluster_id}}-{{appliance_user}}-{{cluster_name}}"
 
-- name: Generate partition name
+- name: Generate partition name even if user hasn't requested one
   ansible.builtin.set_fact:
-    user_partition: "{{ ('Single reconfigurable partition' in partition_choice) | ternary(allocation_name ~ '-reconfig', 'N/A')  }}"
+    user_partition: "{{allocation_name}}-reconfig"
 
 - name: Generate user port number for instance-specific V-IPU container mapped to TCP/8090
   ansible.builtin.set_fact:
@@ -57,7 +61,3 @@
 - name: Generate Prometheus port number for instance-specific V-IPU container mapped to TCP/2113
   ansible.builtin.set_fact:
     vipu_container_exporter_port: "{{ (((cluster_id | int * 10) + 2) % 32768) + azimuth_vipu_base_port | int }}"
-
-- name: Define the terraform state
-  ansible.builtin.set_fact:
-    terraform_state: "{{ cluster_state | default('present') }}"

@@ -24,7 +24,9 @@
       loop_control:
         loop_var: part_var
       register: partition_remove_out
-      when: vipu_partition_list is iterable
+      when:
+        - vipu_partition_list is defined
+        - vipu_partition_list is iterable
   # End block
   when:
     - allocation_size | int > 0
