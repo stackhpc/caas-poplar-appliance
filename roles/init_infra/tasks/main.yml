@@ -4,7 +4,7 @@
 
 - name: Log appliance name
   ansible.builtin.debug:
-    msg: "{{(terraform_state == 'present') | ternary ('Building','Destroying')}} appliance {{cluster_name}} of type {{cluster_type}} & ID {{cluster_id}}"
+    msg: "{{(terraform_state == 'present') | ternary ('Building','Destroying')}} {{cluster_type}} {{cluster_name}} of flavour {{cluster_flavor}} & ID {{cluster_id}}"
 
 - name: Include the vars we need
   ansible.builtin.include_vars:
