@@ -31,4 +31,4 @@
           allocation_name: "{{ hostvars[groups['openstack'][0]].allocation_name }}"
           allocation_size: "{{ hostvars[groups['openstack'][0]].allocation_size }}"
           ipuof_vipu_api_partition_id: "{{ hostvars[groups['openstack'][0]].user_partition | default('none') }}"
-          ipuof_vipu_api_host: "{{ hostvars[groups['openstack'][0]].vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['ctrl_net_ip'] }}"
+          ipuof_vipu_api_host: "127.0.0.1"
