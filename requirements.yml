@@ -1,5 +1,4 @@
 # Modified by Graphcore Ltd.
----
 
 collections:
   - name: https://github.com/stackhpc/ansible-collection-terraform
@@ -9,3 +8,5 @@ collections:
     version: 1.8.0
   - name: moreati.jq
     version: 0.2.1
+  - name: awx.awx
+    version: ">=21.10.2"

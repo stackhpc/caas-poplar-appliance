@@ -65,13 +65,27 @@ parameters:
     options:
       min: 10
     immutable: true
+
+  - name: appliance_lifetime_hrs
+    label: "Select appliance lifetime (hrs)"
+    description: The appliance will be deleted after this time
+    immutable: true
+    kind: choice
+    options:
+      choices:
+        - 8
+        - 12
+        - 24
+        - 48
+
 usage_template: |-
   {% set webconsole = cluster | service("webconsole") %}
   {% set monitoring = cluster | service("monitoring") %}
-  This Poplar appliance ({{cluster.outputs.cluster_operating_system}} size {{cluster.outputs.cluster_flavour_name}}) may be accessed in a web browser via the [Web console service]({{ webconsole.url }}) and by SSH.  SSH keys used are those in the Graphcore LDAP service. SSH is configured to allow login only by the appliance creator and Cloud Development engineers. Further users may be enabled by adding them to the `ipupod` group. The web console logs in as user `ipuuser` automatically.
+  This Poplar appliance ({{cluster.outputs.cluster_operating_system}} size {{cluster.outputs.cluster_flavour_name}}) has a lifetime of {{cluster.outputs.cluster_lifetime}} hrs, and is scheduled for automatic deletion at {{cluster.outputs.cluster_termination_epoch}}.
 
-  You may copy this command to access your instance:
+  You may access the appliance in a web browser via the [Web console service]({{ webconsole.url }}) and by SSH.  The SSH keys used are those in the Graphcore LDAP service. SSH is configured to allow login only by the appliance creator and Cloud Development engineers. Further users may be enabled by adding them to the `ipupod` group. The web console logs in as user `ipuuser` automatically.
 
+  To connect with SSH, you may copy this command:
   ```
   $ ssh {{ cluster.outputs.cluster_user | default("ubuntu") }}@{{ cluster.outputs.cluster_access_ip | default("[cluster ip]") }}
   ```
