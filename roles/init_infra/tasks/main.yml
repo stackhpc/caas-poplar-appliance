@@ -27,11 +27,17 @@
     appliance_project: "{{ openstack_cli_proj.stdout | default( 'ipuops') }}"
     appliance_tenancy: "{{ openstack_cli_tenancy_name.stdout | default( 'ipuops') }}"
     appcred_name: "{{ cluster_name }}_{{ cluster_id }}"
-    allocation_name: "{{cluster_id}}-{{appliance_user}}-{{cluster_name}}"
-    user_partition: "{{allocation_name}}-reconfig"
     vipu_container_user_port: "{{ ((cluster_id | int * 10) % 32768) + azimuth_vipu_base_port | int }}"
     vipu_container_admin_port: "{{ (((cluster_id | int * 10) + 1) % 32768) + azimuth_vipu_base_port | int }}"
     vipu_container_exporter_port: "{{ (((cluster_id | int * 10) + 2) % 32768) + azimuth_vipu_base_port | int }}"
+
+- name: Set allocation name
+  ansible.builtin.set_fact:
+    allocation_name: "{{cluster_id}}-{{appliance_user}}-{{cluster_name}}"
+
+- name: Set partition name
+  ansible.builtin.set_fact:
+    user_partition: "{{allocation_name}}-reconfig"
 
 - name: Include the vars we need
   ansible.builtin.include_vars:
