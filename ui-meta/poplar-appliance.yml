@@ -73,6 +73,7 @@ parameters:
     kind: choice
     options:
       choices:
+        - 1
         - 8
         - 12
         - 24
