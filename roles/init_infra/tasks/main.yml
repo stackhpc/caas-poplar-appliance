@@ -21,6 +21,15 @@
     cmd: openstack project show "$(openstack token issue -f value -c project_id)" -f value -c name
   register: openstack_cli_tenancy_name
 
+- name: Include the vars we need
+  ansible.builtin.include_vars:
+    file: "{{ var_inc_var }}"
+  loop:
+    - "{{playbook_dir}}/group_vars/{{gc_tenancy | default(gc_cloud)}}.yaml"
+    - "{{playbook_dir}}/group_vars/ipums.yaml"
+  loop_control:
+    loop_var: var_inc_var
+
 - name: Set various facts
   ansible.builtin.set_fact:
     appliance_user: "{{ (openstack_cli_user.stdout | split('@') | first | lower) if '@' in openstack_cli_user.stdout else openstack_cli_user.stdout | lower }}"
@@ -38,15 +47,6 @@
 - name: Set partition name
   ansible.builtin.set_fact:
     user_partition: "{{allocation_name}}-reconfig"
-
-- name: Include the vars we need
-  ansible.builtin.include_vars:
-    file: "{{ var_inc_var }}"
-  loop:
-    - "{{playbook_dir}}/group_vars/{{gc_tenancy | default(gc_cloud)}}.yaml"
-    - "{{playbook_dir}}/group_vars/ipums.yaml"
-  loop_control:
-    loop_var: var_inc_var
 
 - name: Test if the appliance is already created (using AppCred as flag)
   block:
