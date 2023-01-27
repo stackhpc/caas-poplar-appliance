@@ -139,7 +139,7 @@
         description: "Schedule created by Ansible"
         state: present
         inventory: "{{ appliance_tenancy }}-{{ cluster_name }}"
-        unified_job_template: compute-appliance
+        unified_job_template: poplar-appliance
         credentials:
           - "{{ appcred_name }}"
         extra_data:
