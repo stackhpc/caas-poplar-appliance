@@ -199,7 +199,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
            #    Slack: #help-gbnwp-cl1                                                  #
            #    Email: cloud-development@graphcore.ai                                   #
            #                                                                            #
-           #  Appliance lifetime: {{ '%02d'|format(appliance_lifetime_hrs|int) }} hr                                                 #
+           #  Appliance lifetime: {{ '%02d'|format(appliance_lifetime_hrs is defined|ternary(appliance_lifetime_hrs, '0')|int) }} hr                                                 #
            #  Deletion scheduled on: {{ appliance_deletion_epoch }}                                #
            #                                                                            #
            ##############################################################################
