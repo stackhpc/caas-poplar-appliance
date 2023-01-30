@@ -77,13 +77,17 @@
       ansible.builtin.shell:
         cmd: date -d '{{ (appliance_lifetime_hrs | int + 1) * 60 }} mins' +'%FT%T' -u
       register: appcred_expiry_result
-      when: not appliance_lifetime_hrs is search("never")
+      when:
+        - appliance_lifetime_hrs is defined
+        - not appliance_lifetime_hrs is search("never")
 
     - name: Calculate deletion time from now + lifetime
       ansible.builtin.shell:
         cmd: date -d '{{ appliance_lifetime_hrs | int * 60 }} mins' +'%F %T' -u
       register: appliance_deletion_result
-      when: not appliance_lifetime_hrs is search("never")
+      when:
+        - appliance_lifetime_hrs is defined
+        - not appliance_lifetime_hrs is search("never")
 
     - name: Set time facts during creation
       ansible.builtin.set_fact:
