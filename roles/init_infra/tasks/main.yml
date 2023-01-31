@@ -154,3 +154,19 @@
         controller_oauthtoken: "{{ controller_oauthtoken }}"
         controller_username: "{{ controller_username }}"
         validate_certs: no
+
+- name: Appliance clean-up, remove schedule
+  when:
+    - terraform_state is search("absent")
+    - not appliance_deletion_epoch is search("never")
+  block:
+    - name: Schedule appliance deletion
+      local_action:
+        module: awx.awx.schedule
+        name: "Deletion task for {{ cluster_name }}"
+        state: absent
+        inventory: "{{ appliance_tenancy }}-{{ cluster_name }}"
+        controller_host: "{{ controller_host }}"
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        controller_username: "{{ controller_username }}"
+        validate_certs: no
