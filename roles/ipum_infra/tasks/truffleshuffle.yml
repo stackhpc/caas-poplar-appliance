@@ -79,7 +79,8 @@
     force_init: yes
     init_reconfigure: yes
   environment:
-    OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+    # TODO fix delete?
+    OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
   register: terraform_provision
 
 - name: Populate facts from Terraform outputs

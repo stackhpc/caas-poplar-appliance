@@ -13,6 +13,7 @@
 - name: find vipu server
   ansible.builtin.set_fact:
       vipu_server_ip: "{{ vipu_servers.get(appliance_tenancy, vipu_servers['default'])['floating_ip'] }}"
+  when: vipu_server_ip is not defined
 
 - name: Delete existing user allocation (to free space)
   block:
@@ -49,12 +50,11 @@
         - allocation_size | int > 0
         - '"no free allocation" in allocation_result.stderr'
 
-    - name: Copy clouds.yaml file
-      ansible.builtin.copy:
-        decrypt: yes
-        src: "{{playbook_dir}}/files/clouds-{{gc_tenancy | default(gc_cloud)}}.yaml"
-        dest: "/etc/openstack/clouds.yaml"
-        mode: 0666
+    # TODO: extra var to get the location in deploy rather than this copy using vault ??
+    - name: find extra clouds.yaml
+      ansible.builtin.set_fact:
+          admin_clouds_yaml: "/runner/ssh/clouds.yaml"
+      when: admin_clouds_yaml is not defined
 
     - name: Get ID of common_ctrl network
       openstack.cloud.networks_info:
@@ -62,12 +62,13 @@
         name: "{{ control_network_name | default('azimuth-vpod-common-ctrl') }}"
       register: ctrl_result
       environment:
-        OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+        OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
 
     - name: Debug ctrl_network result
       ansible.builtin.debug:
         msg: "Ctrl network output {{ ctrl_result }}"
 
+    # TODO: this should all go into the terraform!!!
     # Ensure azimuth-vpod-common-ctrl RBAC policy exists
     - name: Create a new network RBAC policy
       openstack.cloud.neutron_rbac_policy:
@@ -80,7 +81,7 @@
         state: present
       register: rbac_result
       environment:
-        OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+        OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
 
     - name: Get ID of common_storage network
       openstack.cloud.networks_info:
@@ -88,7 +89,7 @@
         name: "{{ storage_network_name | default('azimuth-vpod-common-storage') }}"
       register: storage_result
       environment:
-        OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+        OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
 
     # Ensure azimuth-vpod-common-storage RBAC policy exists
     - name: Create a new network RBAC policy
@@ -101,11 +102,11 @@
         action: "access_as_shared"
         state: present
       environment:
-        OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+        OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
 
     - name: Get allocation properties
       ansible.builtin.command:
-        cmd: vipu-admin{{vipu_ver}} --showjson -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 get allocation {{allocation_name}}
+        cmd: vipu-admin{{vipu_ver}} --showjson -H {{ vipu_server_ip }} -P 8091 get allocation {{allocation_name}}
       when: allocation_size | int > 0
       register: assigned_alloc_list
 
@@ -123,7 +124,7 @@
       block:
         - name: Create partition, here we need to act on the vipu-container
           ansible.builtin.command:
-            cmd: vipu-admin{{vipu_ver}} -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P {{ vipu_container_admin_port }} --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable
+            cmd: vipu-admin{{vipu_ver}} -H {{ vipu_server_ip }} -P {{ vipu_container_admin_port }} --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable
           register: vipu_part_mk
           ignore_errors: true
 
@@ -135,8 +136,3 @@
       when:
         - '"Single reconfigurable partition" in partition_choice'
         - allocation_size | int > 0
-
-    - name: Remove clouds.yaml file so next task runs as the Azimuth user
-      ansible.builtin.file:
-        state: absent
-        path: "/etc/openstack/clouds.yaml"
