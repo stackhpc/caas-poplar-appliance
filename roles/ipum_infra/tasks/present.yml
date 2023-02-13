@@ -10,11 +10,15 @@
 #    IPUMs, which requires execution of terraform.
 # 4. Create partition, if user requested, in the instance cV-IPU
 
+- name: find vipu server
+  ansible.builtin.set_fact:
+      vip_server_ip: "{{ vipu_servers.get(appliance_tenancy, vipu_servers['default'])['floating_ip'] }}"
+
 - name: Delete existing user allocation (to free space)
   block:
     - name: Delete allocation from V-IPU prime
       ansible.builtin.command:
-        cmd: vipu-admin{{vipu_ver}} -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove allocation {{allocation_name}}
+        cmd: vipu-admin{{vipu_ver}} -H {{ vipu_server_ip }} -P 8091 remove allocation {{allocation_name}}
   rescue:
     - name: Inform user
       ansible.builtin.debug:
@@ -26,7 +30,7 @@
     # (failure because of existing allocation is prevented by block above)
     - name: Create the allocation of requested size
       ansible.builtin.command:
-        cmd: vipu-admin{{vipu_ver}} --showjson -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 create allocation {{allocation_name}} --size {{allocation_size | int}}
+        cmd: vipu-admin{{vipu_ver}} --showjson -H {{ vipu_server_ip }} -P 8091 create allocation {{allocation_name}} --size {{allocation_size | int}}
       when: allocation_size | int > 0
       register: allocation_result
   rescue:
