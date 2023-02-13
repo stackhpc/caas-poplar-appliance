@@ -79,4 +79,4 @@
   ansible.builtin.set_fact:
     appcred_expiry_epoch: "{{ appcred_expiry_result.stdout is defined | ternary(appcred_expiry_result.stdout, 'never') }}"
     appliance_deletion_epoch: "{{ appliance_deletion_result.stdout is defined | ternary(appliance_deletion_result.stdout, 'never') }}"
-    schedule_rrule: "{{ query('awx.awx.schedule_rrule', 'none', start_date='' + appliance_deletion_result.stdout is defined | ternary(appliance_deletion_result.stdout,'1969-07-21 02:56:56') + '', timezone='UTC') }}"
+    # ?? schedule_rrule: "{{ query('awx.awx.schedule_rrule', 'none', start_date='' + appliance_deletion_result.stdout is defined | ternary(appliance_deletion_result.stdout,'1969-07-21 02:56:56') + '', timezone='UTC') }}"
