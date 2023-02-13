@@ -12,7 +12,7 @@
 
 - name: find vipu server
   ansible.builtin.set_fact:
-      vip_server_ip: "{{ vipu_servers.get(appliance_tenancy, vipu_servers['default'])['floating_ip'] }}"
+      vipu_server_ip: "{{ vipu_servers.get(appliance_tenancy, vipu_servers['default'])['floating_ip'] }}"
 
 - name: Delete existing user allocation (to free space)
   block:
