@@ -1,11 +1,9 @@
----
 # This file contains parameters common to all gbnwp-cl2:
 #   - projects/tenancies
 #   - vpods
 
 ##
 # Use the following VIPU servers
-vipu_ver: "1.18.0"
 vipu_servers:
   sysopssandpit:
     floating_ip: "10.129.110.16"

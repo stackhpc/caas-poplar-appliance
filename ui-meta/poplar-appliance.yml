@@ -18,6 +18,19 @@ parameters:
         - "Ubuntu 18.04"
     immutable: true
 
+  - name: ipum_model
+    label: "Select type of IPUM"
+    description: |-
+      Select Classic, Bow, or don't care (Classic if available, otherwise Bow)
+    kind: choice
+    default: "classic"
+    options:
+      choices:
+        - "classic"
+        - "bow"
+        - "meh"
+    immutable: true
+
   - name: allocation_size
     label: "Number of IPUs in allocation (<=64)"
     description: |-

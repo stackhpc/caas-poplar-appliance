@@ -1,16 +1,39 @@
 # This task list deconfigures partitions, allocations and IPUMs when the Poplar
 # Appliance is torn down (terraform_state == absent)
 
+- name: If ipum_model is 'meh' we need to find if we're on bow or classic
+  ansible.builtin.shell: |
+    vipu-admin -H {{ vipu_servers[item]['floating_ip'] }} -P 8091 get allocation {{allocation_name}} #{{item}}
+  register: ipum_model_scan
+  when: ipum_model_scan.rc|default(1) != 0
+  ignore_errors: true
+  loop: "{{ (ipum_model == 'meh') | ternary( 'classic,bow', ipum_model ) | split(',') }}"
+
+- name: Debug allocation_result
+  ansible.builtin.debug:
+    var: ipum_model_scan
+
+- name: Set the ipum actual model from user choice
+  ansible.builtin.set_fact:
+    ipum_model_actual: "{{ ipum_model }}"
+
+- name: Work out whether we allocated classic or bow with meh set
+  ansible.builtin.set_fact:
+    ipum_model_actual: "{{ ipum_model_scan.results | rejectattr('rc', 'undefined')| selectattr('rc', '==', 0) | map(attribute='item')  | first | default('meh') }}"
+  when: ipum_model is search('meh')
+
 # This is flakey, if allocation_name isn't known it throws an error so we
 # check the error condition before trying to execute the following block.
 - name: List partitions in our allocation (only)
   ansible.builtin.command:
-    cmd: vipu-admin{{vipu_ver}}  -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P {{ vipu_container_admin_port }} list partitions --allocation {{allocation_name}} --showjson
+    cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P {{ vipu_container_admin_port }} list partitions --allocation {{allocation_name}} --showjson
+  when:
+    - allocation_size | int > 0
+    - not ipum_model_actual is search('meh')
   register: vipu_partition_out
   ignore_errors: true
 
 - name: Partition removal block
-  when: vipu_partition_out.rc == 0
   block:
     - name: Convert partition_out to list
       ansible.builtin.set_fact:
@@ -18,7 +41,7 @@
 
     - name: Remove partitions in our allocation
       ansible.builtin.command:
-        cmd: vipu-admin{{vipu_ver}} -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P {{ vipu_container_admin_port }} remove partition {{ part_var }} --force
+        cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P {{ vipu_container_admin_port }} remove partition {{ part_var }} --force
       loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
       loop_control:
         loop_var: part_var
@@ -26,24 +49,30 @@
       when:
         - vipu_partition_list is defined
         - vipu_partition_list is iterable
-        # End block
+  # End block
+  when:
+    - allocation_size | int > 0
+    - vipu_partition_out.rc is defined and vipu_partition_out.rc == 0
 
 - name: List allocation - the return code shows if the expected alloc exists
   ansible.builtin.command:
-    cmd: vipu-admin{{vipu_ver}} -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
+    cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
+  when:
+    - allocation_size | int > 0
+    - not ipum_model_actual is search('meh')
   register: vipu_alloc_list
   ignore_errors: true
 
 - name: Remove allocation block
-  when: vipu_alloc_list.rc == 0
   block:
     - name: List assigned IPUMs cos we need it for the truffle-shuffle
       ansible.builtin.set_fact:
-        assigned_ipums_list: "{{ vipu_alloc_list.stdout | from_json | moreati.jq.jq('.allocation.spec.agent_ids') }}"
+        assigned_ipums_list: "{{ vipu_alloc_list.stdout | from_json |  moreati.jq.jq('.allocation.spec.agent_ids') }}"
+        #when: vipu_alloc_list.rc == 0
 
     - name: Remove allocation
       ansible.builtin.command:
-        cmd: vipu-admin{{vipu_ver}} -H {{ vipu_servers['default' if '@' in appliance_tenancy else appliance_tenancy]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
+        cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
       register: allocation_remove_out
 
     - name: Copy clouds.yaml file
@@ -63,4 +92,7 @@
       ansible.builtin.file:
         state: absent
         path: "/etc/openstack/clouds.yaml"
-  # End block cleaning up allocations
+        # End block cleaning up allocations
+  when:
+    - allocation_size | int > 0
+    - vipu_alloc_list.rc is defined and vipu_alloc_list.rc == 0

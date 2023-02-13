@@ -44,6 +44,15 @@
   loop_control:
     loop_var: tf_var
 
+- name: Make ssh directory
+  ansible.builtin.file:
+    path: ~/.ssh
+    state: directory
+
+- name: Get GitLab hostkeys
+  ansible.builtin.shell:
+    cmd: ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
     src: "/etc/openstack/clouds.yaml"
