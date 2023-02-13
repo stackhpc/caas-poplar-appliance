@@ -6,6 +6,13 @@
   ansible.builtin.debug:
     msg: "{{(terraform_state == 'present') | ternary ('Building','Destroying')}} {{cluster_type}} {{cluster_name}} of flavour {{cluster_flavor}} & ID {{cluster_id}} & lifetime {{appliance_lifetime_hrs is defined | ternary(appliance_lifetime_hrs, 'none')}}"
 
+- name: debug the env
+  ansible.builtin.shell:
+    cmd: env
+  register: env_details
+- debug:
+    msg: "{{ env_details }}"
+
 - name: Get openstack user name
   ansible.builtin.shell:
     cmd: openstack user show "$(openstack token issue -f value -c user_id)" -f value -c name
