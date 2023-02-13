@@ -13,6 +13,10 @@
 - debug:
     msg: "{{ env_details }}"
 
+- name: Get user's openstack project ID
+  ansible.builtin.shell:
+    cmd: openstack token issue -f value -c project_id --debug
+
 - name: Get openstack user name
   ansible.builtin.shell:
     cmd: openstack user show "$(openstack token issue -f value -c user_id)" -f value -c name
