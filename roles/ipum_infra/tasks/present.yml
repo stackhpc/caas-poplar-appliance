@@ -33,15 +33,6 @@
       register: ssh_test
     - debug:
         msg: "{{ ssh_test }}"
-    - name: test mock ssh via delegate_to
-      ansible.builtin.command:
-        cmd: "hostname"
-      delegate_to: 128.232.227.193
-      remote_user: ubuntu
-      private_key_file: "/home/runner/.ssh/id_rsa"
-      register: ssh_test2
-    - debug:
-        msg: "{{ ssh_test2 }}"
     # This creation can fail only because there aren't enough free IPUMs
     # (failure because of existing allocation is prevented by block above)
     - name: Create the allocation of requested size
