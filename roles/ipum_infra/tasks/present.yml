@@ -27,6 +27,12 @@
 
 - name: Build the appliance when terraform_state is present
   block:
+    - name: test mock ssh
+      ansible.builtin.command:
+        cmd: "ssh -i /home/runner/.ssh/id_rsa ubuntu@128.232.227.193 hostname"
+      register: ssh_test
+    - debug:
+        msg: "{{ ssh_test }}"
     # This creation can fail only because there aren't enough free IPUMs
     # (failure because of existing allocation is prevented by block above)
     - name: Create the allocation of requested size
