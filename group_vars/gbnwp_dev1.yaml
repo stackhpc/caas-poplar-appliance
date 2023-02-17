@@ -27,7 +27,7 @@ vipu_servers:
   bow:
     secgroup: "azimuth-dev1-vpod-bow-ctrl"
     floating_ip: "10.129.110.137"
-    ctrl_net_ip: "10.3.48.102"
+    ctrl_net_ip: "10.3.48.111"
 
 auth_url: "https://gbnwp-cl1.ipu.graphcore.ai:5000"
 dns_base: "openstack.graphcore.ai."
