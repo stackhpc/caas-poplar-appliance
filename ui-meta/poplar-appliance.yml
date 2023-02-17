@@ -29,7 +29,7 @@ parameters:
         - "classic"
         - "bow"
         - "meh"
-    immutable: true
+    immutable: false
 
   - name: allocation_size
     label: "Number of IPUs in allocation (<=64)"
