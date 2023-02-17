@@ -17,7 +17,10 @@
   register: delete_result
   when: delete_result.rc|default(1) != 0
   ignore_errors: true
-  loop: "{{ (ipum_model == 'meh') | ternary( 'classic,bow', ipum_model ) | split(',') }}"
+  #loop: "{{ (ipum_model == 'meh') | ternary( 'classic,bow', ipum_model ) | split(',') }}"
+  loop:
+    - classic
+    - bow
 
 - name: Create the allocation of requested size ipum model
   ansible.builtin.shell: |
