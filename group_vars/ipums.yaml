@@ -16,6 +16,14 @@
 
 gbnwp_cl1:
   gbnwp_cl1:
+    lr75_ipum1:
+      rnic: {ip: 10.5.75.1}
+    lr75_ipum2:
+      rnic: {ip: 10.5.75.2}
+    lr75_ipum3:
+      rnic: {ip: 10.5.75.3}
+    lr75_ipum4:
+      rnic: {ip: 10.5.75.4}
     pod013_ipum1:
       rnic: {mac: '0c:42:a1:78:87:25', ip: 10.5.13.1, sw: gbnwp-pod013-sw2.ipmi.graphcore.ai, port: Et9/1}
       bmc: {mac: '70:69:79:20:24:a0', ip: 10.1.13.1}
