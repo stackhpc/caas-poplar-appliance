@@ -242,6 +242,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     allocation_size = "{{ allocation_size }}"
     partition_name  = "{{ user_partition  }}"
 {% if ipum_model_actual is defined and ipum_model_actual %}
+    ipum_model      = "{{ ipum_model_actual }}"
     vipu_ipaddr     = "{{ vipu_servers[ipum_model_actual]['ctrl_net_ip'] }}" 
     vipu_port       = "{{ vipu_container_user_port }}"
 {% endif %}

@@ -110,6 +110,7 @@ usage_template: |-
   GC_PUBLIC_IP={{cluster.outputs.cluster_access_ip | default("[cluster ip]") }}
   GC_ALLOCATION_SIZE={{cluster.outputs.allocation_size}}
   GC_ALLOCATION_NAME={{cluster.outputs.allocation_name}}
+  GC_IPUM_MODEL={{cluster.outputs.ipum_model}}
   IPUOF_VIPU_API_PARTITION_ID={{cluster.outputs.ipuof_vipu_api_partition_id}}
   IPUOF_VIPU_API_HOST={{cluster.outputs.ipuof_vipu_api_host}}
   ```
