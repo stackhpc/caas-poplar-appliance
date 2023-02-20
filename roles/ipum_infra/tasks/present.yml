@@ -29,7 +29,7 @@
   block:
     - name: test mock ssh
       ansible.builtin.command:
-        cmd: "ssh -i /home/runner/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ubuntu@128.232.227.193 hostname"
+        cmd: "ssh -i /home/runner/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ipuuser@38.83.162.174 hostname"
       register: ssh_test
     - debug:
         msg: "{{ ssh_test }}"
