@@ -165,7 +165,7 @@
         module: awx.awx.schedule
         name: "Deletion task for {{ cluster_name }}"
         state: absent
-        inventory: "{{ appliance_tenancy }}-{{ cluster_name }}"
+        unified_job_template: poplar-appliance
         controller_host: "{{ controller_host }}"
         controller_oauthtoken: "{{ controller_oauthtoken }}"
         controller_username: "{{ controller_username }}"
