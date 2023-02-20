@@ -14,12 +14,17 @@
   ansible.builtin.set_fact:
       vipu_server_ip: "{{ vipu_servers.get(appliance_tenancy, vipu_servers['default'])['floating_ip'] }}"
   when: vipu_server_ip is not defined
+- fail:
+    msg: can't find ssh detatils
+  when: vipu_server_ssh is not defined
+- debug:
+    msg: "Setting up vipu allocation: {{ allocation_name }}"
 
 - name: Delete existing user allocation (to free space)
   block:
     - name: Delete allocation from V-IPU prime
       ansible.builtin.command:
-        cmd: vipu-admin{{vipu_ver}} -H {{ vipu_server_ip }} -P 8091 remove allocation {{allocation_name}}
+        cmd: "{{ vipu_server_ssh }} vipu-admin remove allocation {{ allocation_name }}"
   rescue:
     - name: Inform user
       ansible.builtin.debug:
@@ -27,19 +32,22 @@
 
 - name: Build the appliance when terraform_state is present
   block:
-    - name: test mock ssh
-      ansible.builtin.command:
-        cmd: "ssh -i /home/runner/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ipuuser@38.83.162.174 hostname"
-      register: ssh_test
-    - debug:
-        msg: "{{ ssh_test }}"
     # This creation can fail only because there aren't enough free IPUMs
     # (failure because of existing allocation is prevented by block above)
     - name: Create the allocation of requested size
       ansible.builtin.command:
-        cmd: vipu-admin{{vipu_ver}} --showjson -H {{ vipu_server_ip }} -P 8091 create allocation {{allocation_name}} --size {{allocation_size | int}}
+        cmd: "{{ vipu_server_ssh }} vipu-admin --showjson create allocation '{{ allocation_name }}' --size {{ allocation_size | int }}"
       when: allocation_size | int > 0
       register: allocation_result
+    - debug:
+        msg: "{{ allocation_result }}"
+    - name: Get allocation properties
+      ansible.builtin.command:
+        cmd: "{{ vipu_server_ssh }} vipu-admin --showjson get allocation {{ allocation_name }}"
+      when: allocation_size | int > 0
+      register: assigned_alloc_list
+    - debug:
+        msg: "{{ assigned_alloc_list }}"
   rescue:
     - name: Abort if there simply is not enough space
       ansible.builtin.fail:
@@ -112,7 +120,7 @@
 
     - name: Get allocation properties
       ansible.builtin.command:
-        cmd: vipu-admin{{vipu_ver}} --showjson -H {{ vipu_server_ip }} -P 8091 get allocation {{allocation_name}}
+        cmd: "{{ vipu_server_ssh }} vipu-admin --showjson get allocation {{ allocation_name }}"
       when: allocation_size | int > 0
       register: assigned_alloc_list
 
@@ -130,7 +138,7 @@
       block:
         - name: Create partition, here we need to act on the vipu-container
           ansible.builtin.command:
-            cmd: vipu-admin{{vipu_ver}} -H {{ vipu_server_ip }} -P {{ vipu_container_admin_port }} --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable
+            cmd: "{{ vipu_server_ssh }} vipu-admin --showjson create partition {{ user_partition }} --size {{ allocation_size | int }} --allocation {{ allocation_name }} --reconfigurable"
           register: vipu_part_mk
           ignore_errors: true
 
