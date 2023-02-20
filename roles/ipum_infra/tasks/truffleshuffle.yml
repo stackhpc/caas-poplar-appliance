@@ -49,9 +49,10 @@
     path: ~/.ssh
     state: directory
 
-- name: Get GitLab hostkeys
-  ansible.builtin.shell:
-    cmd: ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+# TODO: this is read only in CaaS CRD runner
+#- name: Get GitLab hostkeys
+#  ansible.builtin.shell:
+#    cmd: ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
 
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
