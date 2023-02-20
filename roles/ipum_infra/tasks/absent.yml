@@ -7,7 +7,7 @@
   register: ipum_model_scan
   when: ipum_model_scan.rc|default(1) != 0
   ignore_errors: true
-  loop: "{{ (ipum_model == 'meh') | ternary( 'classic,bow', ipum_model ) | split(',') }}"
+  loop: "{{ (ipum_model == 'any') | ternary( 'classic,bow', ipum_model ) | split(',') }}"
 
 - name: Debug allocation_result
   ansible.builtin.debug:
@@ -19,8 +19,8 @@
 
 - name: Work out whether we allocated classic or bow with meh set
   ansible.builtin.set_fact:
-    ipum_model_actual: "{{ ipum_model_scan.results | rejectattr('rc', 'undefined')| selectattr('rc', '==', 0) | map(attribute='item')  | first | default('meh') }}"
-  when: ipum_model is search('meh')
+    ipum_model_actual: "{{ ipum_model_scan.results | rejectattr('rc', 'undefined')| selectattr('rc', '==', 0) | map(attribute='item')  | first | default('any') }}"
+  when: ipum_model is search('any')
 
 # This is flakey, if allocation_name isn't known it throws an error so we
 # check the error condition before trying to execute the following block.
@@ -29,7 +29,7 @@
     cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P {{ vipu_container_admin_port }} list partitions --allocation {{allocation_name}} --showjson
   when:
     - allocation_size | int > 0
-    - not ipum_model_actual is search('meh')
+    - not ipum_model_actual is search('any')
   register: vipu_partition_out
   ignore_errors: true
 
@@ -59,7 +59,7 @@
     cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
   when:
     - allocation_size | int > 0
-    - not ipum_model_actual is search('meh')
+    - not ipum_model_actual is search('any')
   register: vipu_alloc_list
   ignore_errors: true
 

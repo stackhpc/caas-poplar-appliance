@@ -28,7 +28,7 @@ parameters:
       choices:
         - "classic"
         - "bow"
-        - "meh"
+        - "any"
     immutable: false
 
   - name: allocation_size
