@@ -84,7 +84,7 @@
 
     # TODO: this should all go into the terraform!!!
     # Ensure azimuth-vpod-common-ctrl RBAC policy exists
-    - name: Create a new network RBAC policy
+    - name: Create a new network RBAC policy for common control
       openstack.cloud.neutron_rbac_policy:
         object_id: "{{ ctrl_result.openstack_networks[0].id}}"
         object_type: "network"
@@ -106,7 +106,7 @@
         OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
 
     # Ensure azimuth-vpod-common-storage RBAC policy exists
-    - name: Create a new network RBAC policy
+    - name: Create a new network RBAC policy for common storage
       openstack.cloud.neutron_rbac_policy:
         object_id: "{{ storage_result.openstack_networks[0].id}}"
         object_type: "network"
@@ -117,6 +117,7 @@
         state: present
       environment:
         OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
+      when: storage_result.openstack_networks
 
     - name: Get allocation properties
       ansible.builtin.command:
