@@ -24,12 +24,30 @@ gbnwp_cl1:
       rnic: {ip: 10.5.75.3}
     lr75_ipum4:
       rnic: {ip: 10.5.75.4}
+    lr75_ipum5:
+      rnic: {ip: 10.5.75.5}
+    lr75_ipum6:
+      rnic: {ip: 10.5.75.6}
+    lr75_ipum7:
+      rnic: {ip: 10.5.75.7}
+    lr75_ipum8:
+      rnic: {ip: 10.5.75.8}
     lr75_ipum9:
       rnic: {ip: 10.5.75.9}
     lr75_ipum10:
       rnic: {ip: 10.5.75.10}
     lr75_ipum11:
       rnic: {ip: 10.5.75.11}
+    lr75_ipum12:
+      rnic: {ip: 10.5.75.12}
+    lr75_ipum13:
+      rnic: {ip: 10.5.75.13}
+    lr75_ipum14:
+      rnic: {ip: 10.5.75.14}
+    lr75_ipum15:
+      rnic: {ip: 10.5.75.15}
+    lr75_ipum16:
+      rnic: {ip: 10.5.75.16}
     pod013_ipum1:
       rnic: {mac: '0c:42:a1:78:87:25', ip: 10.5.13.1, sw: gbnwp-pod013-sw2.ipmi.graphcore.ai, port: Et9/1}
       bmc: {mac: '70:69:79:20:24:a0', ip: 10.1.13.1}
