@@ -4,11 +4,14 @@
 
 - name: Log appliance name
   ansible.builtin.debug:
-    msg: "{{(terraform_state == 'present') | ternary ('Building','Destroying')}} {{cluster_type}} {{cluster_name}} of flavour {{cluster_flavor}} & ID {{cluster_id}} & lifetime {{appliance_lifetime_hrs is defined | ternary(appliance_lifetime_hrs, 'none')}}"
+    msg: "{{(terraform_state == 'present') | ternary ('Building','Destroying')}} {{cluster_type}}
+      {{cluster_name}} of flavour {{cluster_flavor}} & ID {{cluster_id}} & lifetime
+      {{appliance_lifetime_hrs is defined | ternary(appliance_lifetime_hrs, 'none')}}"
 
 - name: Get openstack user name
   ansible.builtin.shell:
-    cmd: openstack user show "$(openstack token issue -f value -c user_id)" -f value -c name
+    cmd: openstack user show "$(openstack token issue -f value -c user_id)" -f value
+      -c name
   register: openstack_cli_user
 
 - name: Get user's openstack project ID
@@ -18,7 +21,8 @@
 
 - name: Get tenancy name
   ansible.builtin.shell:
-    cmd: openstack project show "$(openstack token issue -f value -c project_id)" -f value -c name
+    cmd: openstack project show "$(openstack token issue -f value -c project_id)"
+      -f value -c name
   register: openstack_cli_tenancy_name
 
 - name: Include the vars we need
@@ -32,13 +36,18 @@
 
 - name: Set various facts
   ansible.builtin.set_fact:
-    appliance_user: "{{ (openstack_cli_user.stdout | split('@') | first | lower) if '@' in openstack_cli_user.stdout else openstack_cli_user.stdout | lower }}"
+    appliance_user: "{{ (openstack_cli_user.stdout | split('@') | first | lower) if
+      '@' in openstack_cli_user.stdout else openstack_cli_user.stdout | lower }}"
     appliance_project: "{{ openstack_cli_proj.stdout | default( 'ipuops') }}"
-    appliance_tenancy: "{{ openstack_cli_tenancy_name.stdout | default( 'ipuops') }}"
+    appliance_tenancy: "{{ openstack_cli_tenancy_name.stdout | default( 'ipuops')
+      }}"
     appcred_name: "{{ cluster_name }}_{{ cluster_id }}"
-    vipu_container_user_port: "{{ ((cluster_id | int * 10) % 32768) + azimuth_vipu_base_port | int }}"
-    vipu_container_admin_port: "{{ (((cluster_id | int * 10) + 1) % 32768) + azimuth_vipu_base_port | int }}"
-    vipu_container_exporter_port: "{{ (((cluster_id | int * 10) + 2) % 32768) + azimuth_vipu_base_port | int }}"
+    vipu_container_user_port: "{{ ((cluster_id | int * 10) % 32768) + azimuth_vipu_base_port
+      | int }}"
+    vipu_container_admin_port: "{{ (((cluster_id | int * 10) + 1) % 32768) + azimuth_vipu_base_port
+      | int }}"
+    vipu_container_exporter_port: "{{ (((cluster_id | int * 10) + 2) % 32768) + azimuth_vipu_base_port
+      | int }}"
 
 - name: Set allocation name
   ansible.builtin.set_fact:
@@ -47,6 +56,10 @@
 - name: Set partition name
   ansible.builtin.set_fact:
     user_partition: "{{allocation_name}}-reconfig"
+
+- name: Log some more useful information
+  ansible.builtin.debug:
+    msg: "Application credential name: {{ appcred_name }} for user {{appliance_user}}"
 
 - name: Test if the appliance is already created (using AppCred as flag)
   block:
@@ -75,7 +88,8 @@
 
     - name: Calculate expiration time from now + lifetime + 1 hr
       ansible.builtin.shell:
-        cmd: date -d '{{ (appliance_lifetime_hrs | int + 1) * 60 }} mins' +'%FT%T' -u
+        cmd: date -d '{{ (appliance_lifetime_hrs | int + 1) * 60 }} mins' +'%FT%T'
+          -u
       register: appcred_expiry_result
       when:
         - appliance_lifetime_hrs is defined
@@ -91,9 +105,13 @@
 
     - name: Set time facts during creation
       ansible.builtin.set_fact:
-        appcred_expiry_epoch: "{{ appcred_expiry_result.stdout is defined | ternary(appcred_expiry_result.stdout, 'never') }}"
-        appliance_deletion_epoch: "{{ appliance_deletion_result.stdout is defined | ternary(appliance_deletion_result.stdout, 'never') }}"
-        schedule_rrule: "{{ query('awx.awx.schedule_rrule', 'none', start_date='' + appliance_deletion_result.stdout is defined | ternary(appliance_deletion_result.stdout,'1969-07-21 02:56:56') + '', timezone='UTC') }}"
+        appcred_expiry_epoch: "{{ appcred_expiry_result.stdout is defined | ternary(appcred_expiry_result.stdout,
+          'never') }}"
+        appliance_deletion_epoch: "{{ appliance_deletion_result.stdout is defined
+          | ternary(appliance_deletion_result.stdout, 'never') }}"
+        schedule_rrule: "{{ query('awx.awx.schedule_rrule', 'none', start_date=''
+          + appliance_deletion_result.stdout is defined | ternary(appliance_deletion_result.stdout,'1969-07-21
+          02:56:56') + '', timezone='UTC') }}"
 
 - name: Create long-lived AppCred for user
   when:
@@ -103,7 +121,8 @@
     #TODO: consider making AppCred name more unique (OpenStack complains)
     - name: Test getting user AppCred
       ansible.builtin.shell:
-        cmd: openstack application credential create -f yaml --expiration {{appcred_expiry_epoch}} {{appcred_name}}
+        cmd: openstack application credential create -f yaml --expiration {{appcred_expiry_epoch}}
+          {{appcred_name}}
       register: user_appcred_req
       when: not appliance_deletion_epoch is search("never")
 
@@ -122,8 +141,10 @@
         credential_type: OpenStack AppCred
         inputs:
           auth_url: "{{ auth_url }}"
-          application_credential_id: "{{ user_appcred.id if user_appcred is defined else 'dummy' }}"
-          application_credential_secret: "{{ user_appcred.secret if user_appcred is defined else 'dummy' }}"
+          application_credential_id: "{{ user_appcred.id if user_appcred is defined
+            else 'dummy' }}"
+          application_credential_secret: "{{ user_appcred.secret if user_appcred is
+            defined else 'dummy' }}"
           application_credential_expiry: "{{ appliance_deletion_epoch }}"
         controller_host: "{{ controller_host }}"
         controller_oauthtoken: "{{ controller_oauthtoken }}"
@@ -160,7 +181,7 @@
     - terraform_state is search("absent")
     - not appliance_deletion_epoch is search("never")
   block:
-    - name: Schedule appliance deletion
+    - name: Remove appliance schedule
       local_action:
         module: awx.awx.schedule
         name: "{{ allocation_name }}"
