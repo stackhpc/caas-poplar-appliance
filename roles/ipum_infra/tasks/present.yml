@@ -20,10 +20,14 @@
 - debug:
     msg: "Setting up vipu allocation: {{ allocation_name }}"
 
-- name: Delete existing user allocation (to free space)
+- name: Delete existing user allocation (to free space and avoid name clash)
   block:
     # TODO: this always fails if you have a parition created, that needs deleting first!
-    - name: Delete allocation from V-IPU prime
+    - name: Try delete partition from V-IPU prime
+      ansible.builtin.command:
+        cmd: "{{ vipu_server_ssh }} vipu-admin remove partition {{ user_partition }}"
+      ignore_errors: true
+    - name: Try delete allocation from V-IPU prime
       ansible.builtin.command:
         cmd: "{{ vipu_server_ssh }} vipu-admin remove allocation {{ allocation_name }}"
   rescue:
