@@ -106,30 +106,6 @@ resource "openstack_networking_port_v2" "ctrl" {
 }
 
 ##
-# This block brings up the storage network interface
-#
-data "openstack_networking_network_v2" "stornet" {
-  tags = [ "storage", "{{ storage_network_name | default('azimuth-vpod-common-storage') }}" ]
-}
-
-data "openstack_networking_subnet_v2" "storsub" {
-  tags = [ "storage", "{{ storage_network_name | default('azimuth-vpod-common-storage') }}" ]
-}
-
-resource "openstack_networking_port_v2" "stor" {
-  name      = "{{ cluster_name }}-{{ cluster_type }}-stor"
-  network_id     = data.openstack_networking_network_v2.stornet.id
-  admin_state_up = "true"
-  fixed_ip {
-    subnet_id = data.openstack_networking_subnet_v2.storsub.id
-  }
-  port_security_enabled = "false"
-  #port_security_enabled = "true"
-  #security_group_ids = [ openstack_networking_secgroup_v2.cluster_secgroup.id ]
-}
-
-
-##
 # This block allocates a public floating IP to the appliance
 #
 resource "openstack_networking_floatingip_v2" "app-fip" {
@@ -266,10 +242,6 @@ resource "openstack_compute_instance_v2" "cluster_server" {
 
   network {
     port = "${openstack_networking_port_v2.ctrl.id}"
-  }
-
-  network {
-    port = "${openstack_networking_port_v2.stor.id}"
   }
 }
 
