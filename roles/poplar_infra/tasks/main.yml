@@ -113,3 +113,6 @@
     # appliance_ctrl_ip: "{{ terraform_provision.outputs.appliance_ctrl_ip.value }}"
   when:
     - terraform_state == "present"
+
+# TODO: why does this not wait for the zenith service to come up?
+# TODO: and why does a re-run of the create trigger the volumes and instance to be rebuilt?
