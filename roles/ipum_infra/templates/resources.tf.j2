@@ -96,7 +96,6 @@ resource "openstack_networking_rbac_policy_v2" "rbac_policy_rnic_user" {
 ##
 # Shuffle - Assign IPUMs to project
 module "ipum-user-allocs" {
-#  source     = "git::ssh://git@gitlab.com/openstack-vipu/terraform-modules/vpod-ironic-ipums.git?ref=SYSOP-1000"
   source     = "/home/runner/vpod-ironic-ipums"
   vpod_name  = "{{cluster_name}}"
   cluster_name = "{{gc_cloud}}"
