@@ -95,7 +95,7 @@ parameters:
 usage_template: |-
   {% set webconsole = cluster | service("webconsole") %}
   {% set monitoring = cluster | service("monitoring") %}
-  This Poplar appliance ({{cluster.outputs.cluster_operating_system}} size {{cluster.outputs.cluster_flavour_name}}) has a lifetime of {{cluster.outputs.cluster_lifetime}} hrs, and is scheduled for automatic deletion at {{cluster.outputs.cluster_termination_epoch}}.
+  This Poplar appliance is configured with {{cluster.outputs.allocation_size}} {{cluster.outputs.ipum_model}} IPUs, {{cluster.outputs.cluster_operating_system}} and flavour {{cluster.outputs.cluster_flavour_name}}. The lifetime is {{cluster.outputs.cluster_lifetime}} hrs, hence automatic deletion is scheduled at {{cluster.outputs.cluster_termination_epoch}}.
 
   You may access the appliance in a web browser via the [Web console service]({{ webconsole.url }}) and by SSH.  The SSH keys used are those in the Graphcore LDAP service. SSH is configured to allow login only by the appliance creator and Cloud Development engineers. Further users may be enabled by adding them to the `ipupod` group. The web console logs in as user `ipuuser` automatically.
 
@@ -108,9 +108,7 @@ usage_template: |-
 
   ```
   GC_PUBLIC_IP={{cluster.outputs.cluster_access_ip | default("[cluster ip]") }}
-  GC_ALLOCATION_SIZE={{cluster.outputs.allocation_size}}
   GC_ALLOCATION_NAME={{cluster.outputs.allocation_name}}
-  GC_IPUM_MODEL={{cluster.outputs.ipum_model}}
   IPUOF_VIPU_API_PARTITION_ID={{cluster.outputs.ipuof_vipu_api_partition_id}}
   IPUOF_VIPU_API_HOST={{cluster.outputs.ipuof_vipu_api_host}}
   ```
