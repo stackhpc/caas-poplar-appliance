@@ -153,14 +153,6 @@ resource "openstack_compute_instance_v2" "cluster_server" {
           [DHCPv4]
           UseDNS=false
 {% endif %}
-      - path: /etc/systemd/network/07-stor.network
-        content: |
-          [Match]
-          MACAddress=${openstack_networking_port_v2.stor.mac_address}
-          [Network]
-          DHCP=yes
-          [DHCPv4]
-          UseDNS=false
       - path: /etc/motd
         content: |
            ##############################################################################
