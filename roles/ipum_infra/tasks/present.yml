@@ -22,6 +22,7 @@
 
 - name: Delete existing user allocation (to free space)
   block:
+    # TODO: this always fails if you have a parition created, that needs deleting first!
     - name: Delete allocation from V-IPU prime
       ansible.builtin.command:
         cmd: "{{ vipu_server_ssh }} vipu-admin remove allocation {{ allocation_name }}"
