@@ -25,8 +25,8 @@ vipu_servers:
     ctrl_net_ip: "10.3.47.143"
     vipu_port: "8090"
   bow:
-    floating_ip: "10.129.110.107"
-    ctrl_net_ip: "10.3.47.143"
+    floating_ip: "10.129.111.43"
+    ctrl_net_ip: "10.3.47.190"
     vipu_port: "8090"
 
 auth_url: "https://gbnwp-cl1.ipu.graphcore.ai:5000"
@@ -39,7 +39,8 @@ cidr_hint: "25"
 
 ##
 # LDAP access
-ldap_uri: "ldap://gcgbnwpvldapslave001.it.graphcore.ai ldap://gbbrsvldapslave002.it.graphcore.ai ldap://nooslvldapslave001.it.graphcore.ai ldap://gbbrsvldapmaster001.it.graphcore.ai"
+ldap_uri: "ldap://gcgbnwpvldapslave001.it.graphcore.ai ldap://gbbrsvldapslave002.it.graphcore.ai
+  ldap://nooslvldapslave001.it.graphcore.ai ldap://gbbrsvldapmaster001.it.graphcore.ai"
 ldap_base: "dc=bris,dc=graphcore,dc=ai"
 ldap_base_users: "ou=People,dc=bris,dc=graphcore,dc=ai"
 ldap_user: "uid=svcsysops-ldapbind"
