@@ -49,6 +49,8 @@
       ansible.builtin.command:
         cmd: "{{ vipu_server_ssh }} vipu-admin remove allocation {{ allocation_name }}"
       register: allocation_remove_out
+      # Don't fail if the allocation was never created due to lack of space
+      failed_when: "allocation_remove_out.rc != 0 and 'is unknown' not in allocation_remove_out.stderr"
 
     # Remove the IPUMs in assigned_ipums_list from the user's vpod
     - name: Shuffle IPUMs back to staging
