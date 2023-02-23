@@ -111,7 +111,7 @@
 - name: Get allocation properties
   ansible.builtin.command:
     # TODO fix up for type {{ vipu_servers[ipum_model_actual]['floating_ip'] }}
-    cmd: "{{ vipu_server_ssh }} vipu-admin get allocation {{ allocation_name }}"
+    cmd: "{{ vipu_server_ssh }} vipu-admin --showjson get allocation {{ allocation_name }}"
   when: allocation_size | int > 0
   register: assigned_alloc_list
 
