@@ -17,29 +17,16 @@ storage_network_name: "azimuth-vpod-common-storage"
 
 ##
 # Use the following VIPU servers
-vipu_ver: "1.18.0"
 azimuth_vipu_base_port: 11729
 azimuth_ext_ip_prefix: "10.129.110.131"
 vipu_servers:
-  default:
-    name: "azimuth-vpod-common-ctrl.gbnwp-cl1.ipu.graphcore.ai"
+  classic:
     floating_ip: "10.129.110.107"
     ctrl_net_ip: "10.3.47.143"
     vipu_port: "8090"
-  sysopssandpit:
-    name: "azimuth-vpod-common-ctrl.gbnwp-cl1.ipu.graphcore.ai"
-    floating_ip: "10.129.110.107"
-    ctrl_net_ip: "10.3.47.143"
-    vipu_port: "8090"
-  wonderland:
-    name: "azimuth-vpod-common-ctrl.gbnwp-cl1.ipu.graphcore.ai"
-    floating_ip: "10.129.110.107"
-    ctrl_net_ip: "10.3.47.143"
-    vipu_port: "8090"
-  alderaan:
-    name: "azimuth-vpod-common-ctrl.gbnwp-cl1.ipu.graphcore.ai"
-    floating_ip: "10.129.110.107"
-    ctrl_net_ip: "10.3.47.143"
+  bow:
+    floating_ip: "10.129.111.43"
+    ctrl_net_ip: "10.3.47.190"
     vipu_port: "8090"
 
 auth_url: "https://gbnwp-cl1.ipu.graphcore.ai:5000"
@@ -52,7 +39,8 @@ cidr_hint: "25"
 
 ##
 # LDAP access
-ldap_uri: "ldap://gcgbnwpvldapslave001.it.graphcore.ai ldap://gbbrsvldapslave002.it.graphcore.ai ldap://nooslvldapslave001.it.graphcore.ai ldap://gbbrsvldapmaster001.it.graphcore.ai"
+ldap_uri: "ldap://gcgbnwpvldapslave001.it.graphcore.ai ldap://gbbrsvldapslave002.it.graphcore.ai
+  ldap://nooslvldapslave001.it.graphcore.ai ldap://gbbrsvldapmaster001.it.graphcore.ai"
 ldap_base: "dc=bris,dc=graphcore,dc=ai"
 ldap_base_users: "ou=People,dc=bris,dc=graphcore,dc=ai"
 ldap_user: "uid=svcsysops-ldapbind"

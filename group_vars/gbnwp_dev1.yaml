@@ -17,30 +17,17 @@ storage_network_name: "azimuth-dev1-vpod-common-storage"
 
 ##
 # Use the following VIPU servers
-vipu_ver: "1.18.0"
 azimuth_vipu_base_port: 11729
 azimuth_ext_ip_prefix: "10.129.110.111"
 vipu_servers:
-  default:
-    name: "azimuth-dev1-vpod-common-ctrl.gbnwp-cl1.ipu.graphcore.ai"
+  classic:
+    secgroup: "azimuth-dev1-vpod-common-ctrl"
     floating_ip: "10.129.110.238"
     ctrl_net_ip: "10.3.48.102"
-    vipu_port: "8090"
-  sysopssandpit:
-    name: "azimuth-dev1-vpod-common-ctrl.gbnwp-cl1.ipu.graphcore.ai"
-    floating_ip: "10.129.110.238"
-    ctrl_net_ip: "10.3.48.102"
-    vipu_port: "8090"
-  wonderland:
-    name: "azimuth-dev1-vpod-common-ctrl.gbnwp-cl1.ipu.graphcore.ai"
-    floating_ip: "10.129.110.238"
-    ctrl_net_ip: "10.3.48.102"
-    vipu_port: "8090"
-  alderaan:
-    name: "azimuth-dev1-vpod-common-ctrl.gbnwp-cl1.ipu.graphcore.ai"
-    floating_ip: "10.129.110.238"
-    ctrl_net_ip: "10.3.48.102"
-    vipu_port: "8090"
+  bow:
+    secgroup: "azimuth-dev1-vpod-bow-ctrl"
+    floating_ip: "10.129.110.137"
+    ctrl_net_ip: "10.3.48.111"
 
 auth_url: "https://gbnwp-cl1.ipu.graphcore.ai:5000"
 dns_base: "openstack.graphcore.ai."

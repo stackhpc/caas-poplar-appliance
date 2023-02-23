@@ -168,7 +168,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
            #    Email: cloud-development@graphcore.ai                                   #
            #                                                                            #
            #  Appliance lifetime: {{ '%02d'|format(appliance_lifetime_hrs is defined|ternary(appliance_lifetime_hrs, '0')|int) }} hr                                                 #
-           #  Deletion scheduled on: {{ appliance_deletion_epoch }}                                #
+           #  Deletion scheduled on: {{ appliance_deletion_epoch is search('never')|ternary('Not planning to die',appliance_deletion_epoch)}}                                #
            #                                                                            #
            ##############################################################################
 {% if additional_mounts is defined and additional_mounts %}
@@ -178,9 +178,6 @@ resource "openstack_compute_instance_v2" "cluster_server" {
            {{mnt.fs_spec}} {{mnt.fs_file}} {{mnt.fs_vfstype}} {{mnt.fs_mntops}} {{mnt.fs_freq}} {{mnt.fs_passno}}
 {% endfor %}
 {% endif %}
-      - path: /etc/rinetd.conf
-        content: |
-           127.0.0.1 8090 {{ vipu_servers.get(appliance_tenancy, vipu_servers['default'])['ctrl_net_ip'] }} {{ vipu_container_user_port }}
     runcmd:
       - [ systemctl, restart, systemd-networkd]
       - [ systemctl, restart, rinetd ]
@@ -202,13 +199,17 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     azimuth_project_name = "${data.openstack_identity_auth_scope_v3.scope.project_name}"
     azimuth_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
     guacamole_user = "ipuuser"
-    # TODO appliance_pub_ip = "${openstack_networking_floatingip_v2.app-fip.address}"
+    appliance_type   = "poplar"
+    # TODO?? appliance_pub_ip = "${openstack_networking_floatingip_v2.app-fip.address}"
     allocation_name = "{{ allocation_name }}"
-    allocation_size = "{{ allocation_size }}"
     partition_name  = "{{ user_partition  }}"
-    vipu_ipaddr     = "127.0.0.1"
-    vipu_port       = "8090"
-    ldap_auth_token = "{{ ldap_auth_token | default ("") }}"
+{% if ipum_model_actual is defined and ipum_model_actual %}
+    # TODO make this work with multiple ipum_model_actual
+    vipu_ipaddr     = "{{ vipu_server_ip }}"
+    vipu_port       = "{{ vipu_container_user_port | default('8090') }}"
+{% endif %}
+    # TODO ldap_auth_token = "{{ ldap_auth_token }}"
+    # TODO nethome_secret  = "{{ cephfs_nethome_secret | b64encode }}"
     appliance_lifetime_hrs = "{{ appliance_lifetime_hrs is defined | ternary(appliance_lifetime_hrs, 'none') }}"
     appliance_termination_epoch = "{{ appliance_deletion_epoch }}"
   }
@@ -231,7 +232,6 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     port = "${openstack_networking_port_v2.rnic.id}"
   }
 {% endif %}
-
   network {
     port = "${openstack_networking_port_v2.ctrl.id}"
   }

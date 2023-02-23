@@ -4,22 +4,14 @@
 
 - name: Log appliance name
   ansible.builtin.debug:
-    msg: "{{(terraform_state == 'present') | ternary ('Building','Destroying')}} {{cluster_type}} {{cluster_name}} of flavour {{cluster_flavor}} & ID {{cluster_id}} & lifetime {{appliance_lifetime_hrs is defined | ternary(appliance_lifetime_hrs, 'none')}}"
-
-- name: debug the env
-  ansible.builtin.shell:
-    cmd: env
-  register: env_details
-- debug:
-    msg: "{{ env_details }}"
-
-- name: Get user's openstack project ID
-  ansible.builtin.shell:
-    cmd: openstack token issue -f value -c project_id --debug
+    msg: "{{(terraform_state == 'present') | ternary ('Building','Destroying')}} {{cluster_type}}
+      {{cluster_name}} of flavour {{cluster_flavor}} & ID {{cluster_id}} & lifetime
+      {{appliance_lifetime_hrs is defined | ternary(appliance_lifetime_hrs, 'none')}}"
 
 - name: Get openstack user name
   ansible.builtin.shell:
-    cmd: openstack user show "$(openstack token issue -f value -c user_id)" -f value -c name
+    cmd: openstack user show "$(openstack token issue -f value -c user_id)" -f value
+      -c name
   register: openstack_cli_user
 
 - name: Get user's openstack project ID
@@ -29,7 +21,8 @@
 
 - name: Get tenancy name
   ansible.builtin.shell:
-    cmd: openstack project show "$(openstack token issue -f value -c project_id)" -f value -c name
+    cmd: openstack project show "$(openstack token issue -f value -c project_id)"
+      -f value -c name
   register: openstack_cli_tenancy_name
 
 - name: Include the vars we need
@@ -43,13 +36,18 @@
 
 - name: Set various facts
   ansible.builtin.set_fact:
-    appliance_user: "{{ (openstack_cli_user.stdout | split('@') | first | lower) if '@' in openstack_cli_user.stdout else openstack_cli_user.stdout | lower }}"
+    appliance_user: "{{ (openstack_cli_user.stdout | split('@') | first | lower) if
+      '@' in openstack_cli_user.stdout else openstack_cli_user.stdout | lower }}"
     appliance_project: "{{ openstack_cli_proj.stdout | default( 'ipuops') }}"
-    appliance_tenancy: "{{ openstack_cli_tenancy_name.stdout | default( 'ipuops') }}"
+    appliance_tenancy: "{{ openstack_cli_tenancy_name.stdout | default( 'ipuops')
+      }}"
     appcred_name: "{{ cluster_name }}_{{ cluster_id }}"
-    vipu_container_user_port: "{{ ((cluster_id | int * 10) % 32768) + azimuth_vipu_base_port | int }}"
-    vipu_container_admin_port: "{{ (((cluster_id | int * 10) + 1) % 32768) + azimuth_vipu_base_port | int }}"
-    vipu_container_exporter_port: "{{ (((cluster_id | int * 10) + 2) % 32768) + azimuth_vipu_base_port | int }}"
+    vipu_container_user_port: "{{ ((cluster_id | int * 10) % 32768) + azimuth_vipu_base_port
+      | int }}"
+    vipu_container_admin_port: "{{ (((cluster_id | int * 10) + 1) % 32768) + azimuth_vipu_base_port
+      | int }}"
+    vipu_container_exporter_port: "{{ (((cluster_id | int * 10) + 2) % 32768) + azimuth_vipu_base_port
+      | int }}"
 
 - name: Set allocation name
   ansible.builtin.set_fact:

@@ -44,16 +44,6 @@
   loop_control:
     loop_var: tf_var
 
-- name: Make ssh directory
-  ansible.builtin.file:
-    path: ~/.ssh
-    state: directory
-
-# TODO: this is read only in CaaS CRD runner
-#- name: Get GitLab hostkeys
-#  ansible.builtin.shell:
-#    cmd: ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
-
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
     src: "/etc/openstack/clouds.yaml"
@@ -80,14 +70,14 @@
     force_init: yes
     init_reconfigure: yes
   environment:
-    # TODO fix delete?
     OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
   register: terraform_provision
 
 - name: Populate facts from Terraform outputs
   set_fact:
     user_rnic_net_id: "{{ terraform_provision.outputs.user_rnic_net_id.value }}"
-    user_rnic_subnet_id: "{{ terraform_provision.outputs.user_rnic_subnet_id.value }}"
+    user_rnic_subnet_id: "{{ terraform_provision.outputs.user_rnic_subnet_id.value
+      }}"
     common_ctrl_net_id: "{{ terraform_provision.outputs.common_ctrl_net_id.value}}"
   when:
     - terraform_state == "present"

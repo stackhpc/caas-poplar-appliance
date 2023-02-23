@@ -30,6 +30,7 @@
           cluster_operating_system: "{{ hostvars[groups['openstack'][0]].operating_system }}"
           allocation_name: "{{ hostvars[groups['openstack'][0]].allocation_name }}"
           allocation_size: "{{ hostvars[groups['openstack'][0]].allocation_size }}"
+          ipum_model: "{{ hostvars[groups['openstack'][0]].ipum_model_actual}}"
           ipuof_vipu_api_partition_id: "{{ hostvars[groups['openstack'][0]].user_partition | default('none') }}"
           ipuof_vipu_api_host: "127.0.0.1"
           cluster_lifetime: "{{ hostvars[groups['openstack'][0]].appliance_lifetime_hrs }}"
