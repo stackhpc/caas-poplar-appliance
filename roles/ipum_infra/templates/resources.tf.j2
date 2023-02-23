@@ -28,8 +28,11 @@ resource "openstack_networking_rbac_policy_v2" "user_sg_BE_to_FE" {
 
 # Find the BE SG for the common_ctrl_network
 data "openstack_networking_secgroup_v2" "ctrl_secgroup" {
-  #name = "{{ control_network_name }}"
+{% if ipum_model_actual is defined %}
   name = "{{ vipu_servers[ipum_model_actual]['secgroup'] }}"
+{% else %}
+  name = "{{ control_network_name }}"
+{% endif %}
 }
 
 # Allow ingress from the user SG to the VIPU container port
