@@ -57,5 +57,8 @@
       ansible.builtin.include_role:
         name: ipum_infra
         tasks_from: truffleshuffle.yml
+      # if we don't have assigned_ipums_list then we don't have IPUMs
+      # TODO: ideally we can detect if there are instances and error out?
+      when: assigned_ipums_list is defined
   when:
     - allocation_size | int > 0
