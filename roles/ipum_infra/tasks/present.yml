@@ -21,7 +21,7 @@
 - name: Delete existing allocation from V-IPU prime to free space on update
   ansible.builtin.command:
     # TODO: fix for multiple vipus
-    cmd: "{{ vipu_server_ssh }} remove allocation {{ allocation_name }}"
+    cmd: "{{ vipu_server_ssh }} vipu-admin remove allocation {{ allocation_name }}"
   register: delete_result
   when: delete_result.rc|default(1) != 0
   ignore_errors: true
@@ -31,7 +31,7 @@
 
 - name: Create the allocation of requested size ipum model
   ansible.builtin.shell: |
-    {{ vipu_server_ssh }} create allocation {{allocation_name}} --size {{allocation_size | int}} #{{item}}
+    {{ vipu_server_ssh }} vipu-admin create allocation {{allocation_name}} --size {{allocation_size | int}} #{{item}}
   register: allocation_result
   ignore_errors: true
   when:
@@ -111,7 +111,7 @@
 - name: Get allocation properties
   ansible.builtin.command:
     # TODO fix up for type {{ vipu_servers[ipum_model_actual]['floating_ip'] }}
-    cmd: "{{ vipu_server_ssh }} get allocation {{ allocation_name }}"
+    cmd: "{{ vipu_server_ssh }} vipu-admin get allocation {{ allocation_name }}"
   when: allocation_size | int > 0
   register: assigned_alloc_list
 
@@ -130,7 +130,7 @@
     - name: Create partition, here we need to act on the vipu-container
       ansible.builtin.command:
         # TODO fix up for type {{ vipu_servers[ipum_model_actual]['floating_ip'] }}
-        cmd: "{{ vipu_server_ssh }} --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable"
+        cmd: "{{ vipu_server_ssh }} vipu-admin --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable"
       register: vipu_part_mk
       ignore_errors: true
 

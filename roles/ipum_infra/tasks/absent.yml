@@ -4,7 +4,7 @@
 - name: If ipum_model is 'meh' we need to find if we're on bow or classic
   # TODO: we need to lookup the correct vipu_server here?
   ansible.builtin.shell: |
-    {{ vipu_server_ssh }} get allocation {{allocation_name}} #{{item}}
+    {{ vipu_server_ssh }} vipu-admin get allocation {{allocation_name}} #{{item}}
   register: ipum_model_scan
   when: ipum_model_scan.rc|default(1) != 0
   ignore_errors: true
