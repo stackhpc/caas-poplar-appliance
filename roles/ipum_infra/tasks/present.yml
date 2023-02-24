@@ -130,7 +130,7 @@
     - name: Create partition, here we need to act on the vipu-container
       ansible.builtin.command:
         # TODO fix up for type {{ vipu_servers[ipum_model_actual]['floating_ip'] }}
-        cmd: "{{ vipu_server_ssh }} vipu-admin --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable"
+        cmd: "{{ vipu_server_ssh }} vipu-admin --showjson create partition -P {{ vipu_container_admin_port }} {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable"
       register: vipu_part_mk
       ignore_errors: true
 
