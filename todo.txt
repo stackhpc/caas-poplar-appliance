@@ -1,6 +1,6 @@
 make old awx work with my changes:
-* review with james the new ssh into bow + classic
-* fix floating ip
+* (done) review with james the new ssh into bow + classic (and vipu ip)
+* (done) reivew floating ip
 * restore awx bit, gut make them skip
 * restore legacy clouds.yaml when extra_var not set
 * fix up optional storage network
