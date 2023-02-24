@@ -6,10 +6,12 @@ make old awx work with my changes:
 * fix up optional storage network
 
 next steps:
+* option for image uuids, like other appliances
 * add wait for zenith service 
 * remove references to gbnwp_cl1, and groupvars (fix ipum ips?)
 * implement auto delete with CRD operator?
 
+* auto get the 10.5.x.x IP from this info:
 
 $ vipu-admin get agent lr75-ipum1 --showjson
 {
