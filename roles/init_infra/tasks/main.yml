@@ -46,16 +46,16 @@
     appliance_tenancy: "{{ openstack_cli_tenancy_name.stdout | default( 'ipuops')
       }}"
     appcred_name: "{{ cluster_name }}_{{ cluster_id }}"
-    vipu_container_user_port: "{{ ((cluster_id | int * 10) % 32768) + azimuth_vipu_base_port
+    vipu_container_user_port: "{{ ((cluster_id_safe | int * 10) % 32768) + azimuth_vipu_base_port
       | int }}"
-    vipu_container_admin_port: "{{ (((cluster_id | int * 10) + 1) % 32768) + azimuth_vipu_base_port
+    vipu_container_admin_port: "{{ (((cluster_id_safe | int * 10) + 1) % 32768) + azimuth_vipu_base_port
       | int }}"
-    vipu_container_exporter_port: "{{ (((cluster_id | int * 10) + 2) % 32768) + azimuth_vipu_base_port
+    vipu_container_exporter_port: "{{ (((cluster_id_safe | int * 10) + 2) % 32768) + azimuth_vipu_base_port
       | int }}"
 
 - name: Set allocation name
   ansible.builtin.set_fact:
-    allocation_name: "{{cluster_id}}-{{appliance_user}}-{{cluster_name}}"
+    allocation_name: "{{cluster_id_safe}}-{{appliance_user}}-{{cluster_name}}"
 
 - name: Set partition name
   ansible.builtin.set_fact:
