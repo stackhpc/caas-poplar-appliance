@@ -4,7 +4,7 @@
 - name: If ipum_model is 'meh' we need to find if we're on bow or classic
   # TODO: we need to lookup the correct vipu_server here?
   ansible.builtin.shell: |
-    {{ vipu_server_ssh }} vipu-admin get allocation {{allocation_name}} #{{item}}
+    {{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin get allocation {{allocation_name}} #{{item}}
   register: ipum_model_scan
   when: ipum_model_scan.rc|default(1) != 0
   ignore_errors: true
@@ -28,7 +28,7 @@
 - name: List partitions in our allocation (only)
   ansible.builtin.command:
     # TODO: use ipum_model_actual to lookup which vipu_server_ssh to use? or have two appliances?
-    cmd: "{{ vipu_server_ssh }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} list partitions --allocation {{allocation_name}} --showjson"
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} list partitions --allocation {{allocation_name}} --showjson"
   when:
     - allocation_size | int > 0
     - not ipum_model_actual is search('any')
@@ -43,7 +43,7 @@
 
     - name: Remove partitions in our allocation
       ansible.builtin.command:
-        cmd: "{{ vipu_server_ssh }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} remove partition {{ part_var }} --force"
+        cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} remove partition {{ part_var }} --force"
       loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
       loop_control:
         loop_var: part_var
@@ -58,7 +58,7 @@
 
 - name: List allocation - the return code shows if the expected alloc exists
   ansible.builtin.command:
-    cmd: "{{ vipu_server_ssh }} vipu-admin --showjson get allocation {{allocation_name}}"
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin --showjson get allocation {{allocation_name}}"
   when: allocation_size | int > 0
   register: vipu_alloc_list
   ignore_errors: true
@@ -72,7 +72,7 @@
 
     - name: Remove allocation
       ansible.builtin.command:
-        cmd: "{{ vipu_server_ssh }} vipu-admin remove allocation {{ allocation_name }}"
+        cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin remove allocation {{ allocation_name }}"
       register: allocation_remove_out
       # Don't fail if the allocation was never created due to lack of space
       failed_when: "allocation_remove_out.rc != 0 and 'is unknown' not in allocation_remove_out.stderr"

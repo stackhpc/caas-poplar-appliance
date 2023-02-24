@@ -13,15 +13,17 @@
 # Brute force approach because allocation might be anywhere
 - name: Try delete partition from V-IPU prime to free space on update
   ansible.builtin.command:
-    cmd: "{{ vipu_server_ssh }} vipu-admin remove partition {{ user_partition }}"
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin remove partition {{ user_partition }}"
+  when: delete_result.rc|default(1) != 0
   # TODO: look for missing partition?
   ignore_errors: true
-  # TOOD: make this work with multiple vipu_servers like {{ vipu_servers[item]['floating_ip'] }}
+  loop:
+    - classic
+    - bow
 
 - name: Delete existing allocation from V-IPU prime to free space on update
   ansible.builtin.command:
-    # TODO: fix for multiple vipus
-    cmd: "{{ vipu_server_ssh }} vipu-admin remove allocation {{ allocation_name }}"
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin remove allocation {{ allocation_name }}"
   register: delete_result
   when: delete_result.rc|default(1) != 0
   ignore_errors: true
@@ -110,8 +112,7 @@
 
 - name: Get allocation properties
   ansible.builtin.command:
-    # TODO fix up for type {{ vipu_servers[ipum_model_actual]['floating_ip'] }}
-    cmd: "{{ vipu_server_ssh }} vipu-admin --showjson get allocation {{ allocation_name }}"
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin --showjson get allocation {{ allocation_name }}"
   when: allocation_size | int > 0
   register: assigned_alloc_list
 
@@ -129,8 +130,7 @@
   block:
     - name: Create partition, here we need to act on the vipu-container
       ansible.builtin.command:
-        # TODO fix up for type {{ vipu_servers[ipum_model_actual]['floating_ip'] }}
-        cmd: "{{ vipu_server_ssh }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable"
+        cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable"
       register: vipu_part_mk
       ignore_errors: true
 
