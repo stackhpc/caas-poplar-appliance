@@ -28,7 +28,7 @@
 - name: List partitions in our allocation (only)
   ansible.builtin.command:
     # TODO: use ipum_model_actual to lookup which vipu_server_ssh to use? or have two appliances?
-    cmd: "{{ vipu_server_ssh }} vipu-admin -P {{ vipu_container_admin_port }} list partitions --allocation {{allocation_name}} --showjson"
+    cmd: "{{ vipu_server_ssh }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} list partitions --allocation {{allocation_name}} --showjson"
   when:
     - allocation_size | int > 0
     - not ipum_model_actual is search('any')
@@ -43,7 +43,7 @@
 
     - name: Remove partitions in our allocation
       ansible.builtin.command:
-        cmd: "{{ vipu_server_ssh }} vipu-admin -P {{ vipu_container_admin_port }} remove partition {{ part_var }} --force"
+        cmd: "{{ vipu_server_ssh }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} remove partition {{ part_var }} --force"
       loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
       loop_control:
         loop_var: part_var
