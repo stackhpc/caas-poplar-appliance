@@ -7,7 +7,7 @@ make old awx work with my changes:
 
 next steps:
 * option for image uuids, like other appliances
-* add wait for zenith service 
+* add wait for zenith service
 * remove references to gbnwp_cl1, and groupvars (fix ipum ips?)
 * implement auto delete with CRD operator?
 
