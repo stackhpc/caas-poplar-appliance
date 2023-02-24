@@ -21,7 +21,7 @@
 - name: Delete existing allocation from V-IPU prime to free space on update
   ansible.builtin.command:
     # TODO: fix for multiple vipus
-    cmd: "{{ ansible_facts.get(f'vipu_server_ssh_{item}') }} vipu-admin remove allocation {{ allocation_name }}"
+    cmd: "{{ vipu_server_ssh }} vipu-admin remove allocation {{ allocation_name }}"
   register: delete_result
   when: delete_result.rc|default(1) != 0
   ignore_errors: true
@@ -31,7 +31,7 @@
 
 - name: Create the allocation of requested size ipum model
   ansible.builtin.shell: |
-    {{ ansible_facts.get(f'vipu_server_ssh_{item}') }} vipu-admin create allocation {{allocation_name}} --size {{allocation_size | int}} #{{item}}
+    {{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin create allocation {{allocation_name}} --size {{allocation_size | int}} #{{item}}
   register: allocation_result
   ignore_errors: true
   when:
