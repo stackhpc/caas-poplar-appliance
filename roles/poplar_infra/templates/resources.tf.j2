@@ -105,14 +105,15 @@ resource "openstack_networking_port_v2" "ctrl" {
   security_group_ids = [ openstack_networking_secgroup_v2.poplar_secgroup.id, data.openstack_networking_secgroup_v2.vipu_secgroup.id ]
 }
 
-##
-# This block allocates a public floating IP to the appliance
-#
-#resource "openstack_networking_floatingip_v2" "app-fip" {
-#  pool = "external"
-#  port_id = "${openstack_networking_port_v2.ctrl.id}"
-#}
-
+{% if cluster_floating_ip_address is defined and cluster_floating_ip_address %}
+#####
+##### Floating IP association
+#####
+resource "openstack_networking_floatingip_associate_v2" "app-fip" {
+  floating_ip = "{{ cluster_floating_ip_address }}"
+  port_id = "${openstack_networking_port_v2.ctrl.id}"
+}
+{% endif %}
 
 #####
 ##### Cluster nodes
@@ -200,7 +201,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     azimuth_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
     guacamole_user = "ipuuser"
     appliance_type   = "poplar"
-    # TODO?? appliance_pub_ip = "${openstack_networking_floatingip_v2.app-fip.address}"
+    appliance_pub_ip = "{{ cluster_floating_ip_address | default('') }}"
     allocation_name = "{{ allocation_name }}"
     partition_name  = "{{ user_partition  }}"
 {% if ipum_model_actual is defined and ipum_model_actual %}
