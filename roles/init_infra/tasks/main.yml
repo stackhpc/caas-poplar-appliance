@@ -34,6 +34,10 @@
   loop_control:
     loop_var: var_inc_var
 
+- name: sanitise the cluster_id
+  ansible.builtin.set_fact:
+    cluster_id: "{{ cluster_id | int }}"
+
 - name: Set various facts
   ansible.builtin.set_fact:
     appliance_user: "{{ (openstack_cli_user.stdout | split('@') | first | lower) if
