@@ -31,7 +31,7 @@
 
 - name: Create the allocation of requested size ipum model
   ansible.builtin.shell: |
-    {{ vipu_server_ssh }} vipu-admin create allocation {{allocation_name}} --size {{allocation_size | int}} #{{item}}
+    {{ ansible_facts.get(f'vipu_server_ssh_{item}') }} vipu-admin create allocation {{allocation_name}} --size {{allocation_size | int}} #{{item}}
   register: allocation_result
   ignore_errors: true
   when:
