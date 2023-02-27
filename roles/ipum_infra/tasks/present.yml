@@ -49,8 +49,7 @@
 - name: Work out whether we allocated classic or bow
   ansible.builtin.set_fact:
     ipum_model_actual: "{{ allocation_result.results | rejectattr('rc', 'undefined')|
-      selectattr('rc', '==', 0) | map(attribute='item')  | first | default('none')
-      }}"
+      selectattr('rc', '==', 0) | map(attribute='item')  | first ) }}"
 
 - name: Debug allocation_result
   ansible.builtin.debug:

@@ -2,12 +2,16 @@
 - name: Create or destroy appliance
   hosts: openstack
   vars:
-    image_name: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_name') | first }}"
-    image_tag: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system) | map(attribute='image_tag') | first }}"
+    image_name: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system)
+      | map(attribute='image_name') | first }}"
+    image_tag: "{{ poplar_appliance_images | selectattr('name', 'equalto', operating_system)
+      | map(attribute='image_tag') | first }}"
     execution_order:
-      - "{{ (terraform_state == 'present' or terraform_state == 'absent') | ternary('init_infra','') }}"
+      - "{{ (terraform_state == 'present' or terraform_state == 'absent') | ternary('init_infra','')
+        }}"
       - "{{ (terraform_state == 'present') | ternary('ipum_infra','') }}"
-      - "{{ (terraform_state == 'present' or terraform_state == 'absent') | ternary('poplar_infra','') }}"
+      - "{{ (terraform_state == 'present' or terraform_state == 'absent') | ternary('poplar_infra','')
+        }}"
       - "{{ (terraform_state == 'absent' ) | ternary('ipum_infra','') }}"
 
   tasks:
@@ -24,14 +28,20 @@
     - debug: var=outputs
       vars:
         outputs:
-          cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_access_ip }}"
+          cluster_access_ip: "{{ hostvars[groups['openstack'][0]].cluster_access_ip
+            }}"
           cluster_user: "{{ hostvars[groups['openstack'][0]].appliance_user }}"
-          cluster_flavour_name: "{{ hostvars[groups['openstack'][0]].cluster_flavour_name }}"
-          cluster_operating_system: "{{ hostvars[groups['openstack'][0]].operating_system }}"
+          cluster_flavour_name: "{{ hostvars[groups['openstack'][0]].cluster_flavour_name
+            }}"
+          cluster_operating_system: "{{ hostvars[groups['openstack'][0]].operating_system
+            }}"
           allocation_name: "{{ hostvars[groups['openstack'][0]].allocation_name }}"
           allocation_size: "{{ hostvars[groups['openstack'][0]].allocation_size }}"
-          ipum_model: "{{ hostvars[groups['openstack'][0]].ipum_model_actual}}"
-          ipuof_vipu_api_partition_id: "{{ hostvars[groups['openstack'][0]].user_partition | default('none') }}"
+          ipum_model: "{{ hostvars[groups['openstack'][0]].ipum_model_actual | default('none')}}"
+          ipuof_vipu_api_partition_id: "{{ hostvars[groups['openstack'][0]].user_partition
+            | default('none') }}"
           ipuof_vipu_api_host: "127.0.0.1"
-          cluster_lifetime: "{{ hostvars[groups['openstack'][0]].appliance_lifetime_hrs }}"
-          cluster_termination_epoch: "{{ hostvars[groups['openstack'][0]].appliance_deletion_epoch }}"
+          cluster_lifetime: "{{ hostvars[groups['openstack'][0]].appliance_lifetime_hrs
+            }}"
+          cluster_termination_epoch: "{{ hostvars[groups['openstack'][0]].appliance_deletion_epoch
+            }}"
