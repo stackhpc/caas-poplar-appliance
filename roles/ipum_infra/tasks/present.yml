@@ -65,6 +65,11 @@
     #msg: "Detected IPUM type: {{ipum_model_actual | type_debug}}"
     msg: "Detected IPUM type: {{ipum_model_actual }}"
 
+- name: Set clouds.yaml location if missing
+  ansible.builtin.set_fact:
+    admin_clouds_yaml: "{{playbook_dir}}/files/clouds-{{gc_tenancy | default(gc_cloud)}}.yaml"
+  when: admin_clouds_yaml is not defined
+
 - name: Get ID of common_ctrl network
   openstack.cloud.networks_info:
     cloud: openstack
