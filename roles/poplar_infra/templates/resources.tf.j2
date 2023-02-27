@@ -172,6 +172,11 @@ resource "openstack_compute_instance_v2" "cluster_server" {
            #  Deletion scheduled on: {{ appliance_deletion_epoch is search('never')|ternary('Not planning to die',appliance_deletion_epoch)}}                                #
            #                                                                            #
            ##############################################################################
+      - path: /etc/ceph/cephfspublic.secret
+        owner: root:root
+        permissions: 0600
+        content: |
+           {{cephfs_public_secret}}
 {% if additional_mounts is defined and additional_mounts %}
       - path: /etc/ansible-init/includes/fstab.addendum
         content: |
