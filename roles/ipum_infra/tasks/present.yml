@@ -50,6 +50,8 @@
   ansible.builtin.set_fact:
     ipum_model_actual: "{{ allocation_result.results | rejectattr('rc', 'undefined')|
       selectattr('rc', '==', 0) | map(attribute='item')  | first }}"
+  when:
+    - allocation_size | int > 0
 
 - name: Debug allocation_result
   ansible.builtin.debug:
@@ -59,7 +61,7 @@
 - name: Debug ipum actual name
   ansible.builtin.debug:
     #msg: "Detected IPUM type: {{ipum_model_actual | type_debug}}"
-    msg: "Detected IPUM type: {{ipum_model_actual }}"
+    msg: "Detected IPUM type: {{ipum_model_actual | default('none') }}"
 
 - name: Copy clouds.yaml file
   ansible.builtin.copy:
