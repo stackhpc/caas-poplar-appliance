@@ -131,9 +131,9 @@ resource "openstack_networking_port_v2" "stor" {
 {% endif %}
 
 {% if cluster_floating_ip_address is defined and cluster_floating_ip_address %}
-#####
-##### Floating IP association
-#####
+##
+# This block allocates a public floating IP to the appliance
+#
 resource "openstack_networking_floatingip_associate_v2" "app-fip" {
   floating_ip = "{{ cluster_floating_ip_address }}"
   port_id = "${openstack_networking_port_v2.ctrl.id}"
