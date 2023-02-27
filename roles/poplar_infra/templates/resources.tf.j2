@@ -105,6 +105,31 @@ resource "openstack_networking_port_v2" "ctrl" {
   security_group_ids = [ openstack_networking_secgroup_v2.poplar_secgroup.id, data.openstack_networking_secgroup_v2.vipu_secgroup.id ]
 }
 
+{% if storage_result.openstack_networks %}
+##
+# This block brings up the storage network interface
+#
+data "openstack_networking_network_v2" "stornet" {
+  tags = [ "storage", "{{ storage_network_name | default('azimuth-vpod-common-storage') }}" ]
+}
+
+data "openstack_networking_subnet_v2" "storsub" {
+  tags = [ "storage", "{{ storage_network_name | default('azimuth-vpod-common-storage') }}" ]
+}
+
+resource "openstack_networking_port_v2" "stor" {
+  name      = "{{ cluster_name }}-{{ cluster_type }}-stor"
+  network_id     = data.openstack_networking_network_v2.stornet.id
+  admin_state_up = "true"
+  fixed_ip {
+    subnet_id = data.openstack_networking_subnet_v2.storsub.id
+  }
+  port_security_enabled = "false"
+  #port_security_enabled = "true"
+  #security_group_ids = [ openstack_networking_secgroup_v2.cluster_secgroup.id ]
+}
+{% endif %}
+
 {% if cluster_floating_ip_address is defined and cluster_floating_ip_address %}
 #####
 ##### Floating IP association
@@ -149,6 +174,16 @@ resource "openstack_compute_instance_v2" "cluster_server" {
         content: |
           [Match]
           MACAddress=${openstack_networking_port_v2.rnic.mac_address}
+          [Network]
+          DHCP=yes
+          [DHCPv4]
+          UseDNS=false
+{% endif %}
+{% if storage_result.openstack_networks %}
+      - path: /etc/systemd/network/07-stor.network
+        content: |
+          [Match]
+          MACAddress=${openstack_networking_port_v2.stor.mac_address}
           [Network]
           DHCP=yes
           [DHCPv4]
@@ -237,9 +272,16 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     port = "${openstack_networking_port_v2.rnic.id}"
   }
 {% endif %}
+
   network {
     port = "${openstack_networking_port_v2.ctrl.id}"
   }
+
+{% if storage_result.openstack_networks %}
+  network {
+    port = "${openstack_networking_port_v2.stor.id}"
+  }
+{% endif %}
 }
 
 resource "openstack_compute_volume_attach_v2" "zenith_volume" {
