@@ -61,24 +61,20 @@
   ansible.builtin.set_fact:
     user_partition: "{{allocation_name}}-reconfig"
 
-- name: Calculate expiration time from now + lifetime + 1 hr
-  ansible.builtin.shell:
-    cmd: date -d '{{ (appliance_lifetime_hrs | int + 1) * 60 }} mins' +'%FT%T' -u
-  register: appcred_expiry_result
-  when:
-    - appliance_lifetime_hrs is defined
-    - not appliance_lifetime_hrs is search("never")
-
+# TODO: get CRD to inject its calcuated delete time
 - name: Calculate deletion time from now + lifetime
   ansible.builtin.shell:
     cmd: date -d '{{ appliance_lifetime_hrs | int * 60 }} mins' +'%F %T' -u
   register: appliance_deletion_result
   when:
+    - appliance_deletion_epoch is not defined
     - appliance_lifetime_hrs is defined
     - not appliance_lifetime_hrs is search("never")
 
 - name: Set time facts during creation
   ansible.builtin.set_fact:
-    appcred_expiry_epoch: "{{ appcred_expiry_result.stdout is defined | ternary(appcred_expiry_result.stdout, 'never') }}"
     appliance_deletion_epoch: "{{ appliance_deletion_result.stdout is defined | ternary(appliance_deletion_result.stdout, 'never') }}"
-    # ?? schedule_rrule: "{{ query('awx.awx.schedule_rrule', 'none', start_date='' + appliance_deletion_result.stdout is defined | ternary(appliance_deletion_result.stdout,'1969-07-21 02:56:56') + '', timezone='UTC') }}"
+
+- name: Import tasks for awx, when required
+  ansible.builtin.import_tasks: awx.yml
+  when: awx_skip is not defined
