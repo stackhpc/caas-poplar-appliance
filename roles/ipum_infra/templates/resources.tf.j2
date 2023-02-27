@@ -6,7 +6,7 @@ provider "openstack" {
 }
 
 variable "rnic_physnet" {
-  default = "physnet2"
+  default = "{{ vipu_rnic_physnet | default('physnet1') }}"
 }
 
 ##
