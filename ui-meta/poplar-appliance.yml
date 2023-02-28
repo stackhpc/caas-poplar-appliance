@@ -10,7 +10,7 @@ parameters:
     description: |-
       Attach an external IP to the workstation for access using SSH.
     kind: cloud.ip
-    required: false
+    required: true
     immutable: true
 
   - name: operating_system
@@ -18,7 +18,7 @@ parameters:
     description: |-
       The operating system to install in appliance.
     kind: choice
-    default: "Ubuntu 22.04"
+    default: "Ubuntu 20.04"
     options:
       choices:
         - "Ubuntu 22.04"
