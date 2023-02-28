@@ -33,3 +33,28 @@ gc_test:
       rnic: {ip: 10.5.75.15}
     lr75_ipum16:
       rnic: {ip: 10.5.75.16}
+
+# TODO: move these to all.yaml? or role defaults?
+#control_network_name: "azimuth-vpod-common-ctrl"
+#storage_network_name: "azimuth-vpod-common-storage"
+
+azimuth_vipu_base_port: 11729
+azimuth_ext_ip_prefix: "10.129.110.131"
+dns_base: "nova."
+
+##
+# Required by vpod-nets, value doesn't matter in our context because we're not
+# routing the RNIC networks.
+cidr_hint: "25"
+
+##
+# LDAP access
+ldap_uri: ""
+ldap_base: ""
+ldap_base_users: ""
+ldap_user: ""
+ldap_binddn: ""
+
+##
+# Additional mounts for Poplar VM
+additional_mounts: []
