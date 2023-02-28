@@ -63,14 +63,6 @@
   register: vipu_alloc_list
   ignore_errors: true
 
-- name: Get ID of common_storage network, if it exists
-  openstack.cloud.networks_info:
-    cloud: openstack
-    name: "{{ storage_network_name | default('azimuth-vpod-common-storage') }}"
-  register: storage_result
-  environment:
-    OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
-
 - name: Remove allocation block
   block:
     - name: List assigned IPUMs cos we need it for the truffle-shuffle

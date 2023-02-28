@@ -105,7 +105,7 @@ resource "openstack_networking_port_v2" "ctrl" {
   security_group_ids = [ openstack_networking_secgroup_v2.poplar_secgroup.id, data.openstack_networking_secgroup_v2.vipu_secgroup.id ]
 }
 
-{% if storage_result.openstack_networks %}
+{% if storage_network_name is defined %}
 ##
 # This block brings up the storage network interface
 #
@@ -179,7 +179,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
           [DHCPv4]
           UseDNS=false
 {% endif %}
-{% if storage_result.openstack_networks %}
+{% if storage_network_name is defined %}
       - path: /etc/systemd/network/07-stor.network
         content: |
           [Match]
@@ -277,7 +277,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     port = "${openstack_networking_port_v2.ctrl.id}"
   }
 
-{% if storage_result.openstack_networks %}
+{% if storage_network_name is defined %}
   network {
     port = "${openstack_networking_port_v2.stor.id}"
   }

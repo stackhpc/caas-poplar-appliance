@@ -47,12 +47,12 @@ vipu_servers:
   bow:
     secgroup: "azimuth-vpod-bow-ctrl"
 
+#
 # TODO: move these to all.yaml? or role defaults?
-#control_network_name: "azimuth-vpod-common-ctrl"
-#storage_network_name: "azimuth-vpod-common-storage"
-
+#
 azimuth_vipu_base_port: 11729
 dns_base: "nova."
+#control_network_name: "azimuth-vpod-common-ctrl"
 
 ##
 # Required by vpod-nets, value doesn't matter in our context because we're not
