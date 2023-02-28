@@ -7,7 +7,8 @@
   register: ipum_model_scan
   when: ipum_model_scan.rc|default(1) != 0
   ignore_errors: true
-  loop: "{{ (ipum_model == 'any') | ternary( 'classic,bow', ipum_model ) | split(',') }}"
+  loop: "{{ (ipum_model == 'any') | ternary( 'classic,bow', ipum_model ) | split(',')
+    }}"
 
 - name: Debug allocation_result
   ansible.builtin.debug:
@@ -19,14 +20,18 @@
 
 - name: Work out whether we allocated classic or bow with meh set
   ansible.builtin.set_fact:
-    ipum_model_actual: "{{ ipum_model_scan.results | rejectattr('rc', 'undefined')| selectattr('rc', '==', 0) | map(attribute='item')  | first | default('any') }}"
+    ipum_model_actual: "{{ ipum_model_scan.results | rejectattr('rc', 'undefined')|
+      selectattr('rc', '==', 0) | map(attribute='item')  | first | default('any')
+      }}"
   when: ipum_model is search('any')
 
 # This is flakey, if allocation_name isn't known it throws an error so we
 # check the error condition before trying to execute the following block.
 - name: List partitions in our allocation (only)
   ansible.builtin.command:
-    cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P {{ vipu_container_admin_port }} list partitions --allocation {{allocation_name}} --showjson
+    cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P {{
+      vipu_container_admin_port }} list partitions --allocation {{allocation_name}}
+      --showjson
   when:
     - allocation_size | int > 0
     - not ipum_model_actual is search('any')
@@ -37,11 +42,13 @@
   block:
     - name: Convert partition_out to list
       ansible.builtin.set_fact:
-        vipu_partition_list: "{{ vipu_partition_out.stdout | from_json | community.general.json_query('partitions[*].id') | list }}"
+        vipu_partition_list: "{{ vipu_partition_out.stdout | from_json | community.general.json_query('partitions[*].id')
+          | list }}"
 
     - name: Remove partitions in our allocation
       ansible.builtin.command:
-        cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P {{ vipu_container_admin_port }} remove partition {{ part_var }} --force
+        cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P
+          {{ vipu_container_admin_port }} remove partition {{ part_var }} --force
       loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
       loop_control:
         loop_var: part_var
@@ -56,7 +63,8 @@
 
 - name: List allocation - the return code shows if the expected alloc exists
   ansible.builtin.command:
-    cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
+    cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P 8091
+      --showjson get allocation {{allocation_name}}
   when:
     - allocation_size | int > 0
     - not ipum_model_actual is search('any')
@@ -67,13 +75,17 @@
   block:
     - name: List assigned IPUMs cos we need it for the truffle-shuffle
       ansible.builtin.set_fact:
-        assigned_ipums_list: "{{ vipu_alloc_list.stdout | from_json |  moreati.jq.jq('.allocation.spec.agent_ids') }}"
+        assigned_ipums_list: "{{ vipu_alloc_list.stdout | from_json |  moreati.jq.jq('.allocation.spec.agent_ids')
+          }}"
         #when: vipu_alloc_list.rc == 0
 
     - name: Remove allocation
       ansible.builtin.command:
-        cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
+        cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P
+          8091 remove allocation {{ allocation_name }}
       register: allocation_remove_out
+      # Don't fail if the allocation was never created due to lack of space
+      failed_when: "allocation_remove_out.rc != 0 and 'is unknown' not in allocation_remove_out.stderr"
 
     - name: Copy clouds.yaml file
       ansible.builtin.copy:
@@ -87,6 +99,9 @@
       ansible.builtin.include_role:
         name: ipum_infra
         tasks_from: truffleshuffle.yml
+      # if we don't have assigned_ipums_list then we don't have IPUMs
+      # TODO: ideally we can detect if there are instances and error out?
+      when: assigned_ipums_list is defined
 
     - name: Remove clouds.yaml file so next play runs as the Azimuth user
       ansible.builtin.file:
