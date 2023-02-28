@@ -97,7 +97,7 @@ parameters:
     description: |-
       Attach an external IP to the workstation for access using SSH.
     kind: cloud.ip
-    required: true
+    required: false
     immutable: true
 
 usage_template: |-
