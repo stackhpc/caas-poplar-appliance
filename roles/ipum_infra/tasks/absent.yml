@@ -77,6 +77,14 @@
       # Don't fail if the allocation was never created due to lack of space
       failed_when: "allocation_remove_out.rc != 0 and 'is unknown' not in allocation_remove_out.stderr"
 
+    - name: Get ID of common_storage network, if it exists
+      openstack.cloud.networks_info:
+        cloud: openstack
+        name: "{{ storage_network_name | default('azimuth-vpod-common-storage') }}"
+      register: storage_result
+      environment:
+        OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
+
     # Remove the IPUMs in assigned_ipums_list from the user's vpod
     - name: Shuffle IPUMs back to staging
       ansible.builtin.include_role:
