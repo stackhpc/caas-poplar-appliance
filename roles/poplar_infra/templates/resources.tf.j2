@@ -132,11 +132,21 @@ resource "openstack_networking_port_v2" "stor" {
 ##
 # This block allocates a public floating IP to the appliance
 #
-resource "openstack_networking_floatingip_v2" "app-fip" {
-  pool = "external"
-  port_id = "${openstack_networking_port_v2.ctrl.id}"
-}
+#resource "openstack_networking_floatingip_v2" "app-fip" {
+#  pool = "external"
+#  port_id = "${openstack_networking_port_v2.ctrl.id}"
+#}
+{% if cluster_floating_ip_address is defined and cluster_floating_ip_address %}
+#####
+##### Floating IP association
+#####
 
+resource "openstack_compute_floatingip_associate_v2" "cluster_floatingip_assoc" {
+  floating_ip = "{{ cluster_floating_ip_address }}"
+  instance_id = "${openstack_compute_instance_v2.cluster_server.id}"
+  fixed_ip    = "${openstack_compute_instance_v2.cluster_server.network.1.fixed_ip_v4}"
+}
+{% endif %}
 
 #####
 ##### Cluster nodes
