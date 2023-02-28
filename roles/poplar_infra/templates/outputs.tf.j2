@@ -17,7 +17,7 @@ output "cluster_flavour_name" {
 
 output "cluster_access_ip" {
   description = "The floating IP associated with the appliance"
-  value       = "${openstack_networking_floatingip_v2.app-fip.address}"
+  value       = "{{cluster_floating_ip_address}}"
 }
 
 output "cluster_user" {
