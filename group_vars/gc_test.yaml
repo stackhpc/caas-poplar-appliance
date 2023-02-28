@@ -1,4 +1,7 @@
 ---
+# TODO: deployment specific bits need to be in cluster template CRD
+
+# we can get 10.2.x.x from the vipu controller, why is this here?
 gc_test:
   gc_test:
     lr75_ipum1:
@@ -34,12 +37,21 @@ gc_test:
     lr75_ipum16:
       rnic: {ip: 10.5.75.16}
 
+# TODO: secgroup not needed with SSH, remove this
+azimuth_ext_ip_prefix: "10.129.110.131"
+
+# left behind after moving to ssh
+vipu_servers:
+  classic:
+    secgroup: "azimuth-vpod-common-ctrl"
+  bow:
+    secgroup: "azimuth-vpod-bow-ctrl"
+
 # TODO: move these to all.yaml? or role defaults?
 #control_network_name: "azimuth-vpod-common-ctrl"
 #storage_network_name: "azimuth-vpod-common-storage"
 
 azimuth_vipu_base_port: 11729
-azimuth_ext_ip_prefix: "10.129.110.131"
 dns_base: "nova."
 
 ##
