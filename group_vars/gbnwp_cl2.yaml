@@ -18,7 +18,7 @@ storage_network_name: "azimuth-vpod-common-storage"
 ##
 # Use the following VIPU servers
 azimuth_vipu_base_port: 11729
-azimuth_ext_ip_prefix: "10.129.110.131"
+azimuth_ext_ip_prefix: "10.129.110.12"
 vipu_servers:
   classic:
     secgroup: "tycho-common-ctrl"
@@ -26,7 +26,7 @@ vipu_servers:
     ctrl_net_ip: "10.3.55.170"
   bow:
     secgroup: "tycho-bow-ctrl"
-    floating_ip: "10.129.111.31"
+    floating_ip: "10.129.110.31"
     ctrl_net_ip: "10.3.55.187"
 
 auth_url: "https://gbnwp-cl2.ipu.graphcore.ai:5000"
