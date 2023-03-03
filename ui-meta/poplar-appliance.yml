@@ -5,14 +5,6 @@ label: "Graphcore Poplar Appliance"
 description: Poplar host accessible via a web browser and by LDAP SSH.
 logo: https://raw.githubusercontent.com/graphcore/caas-poplar-appliance/main/assets/graphcore.png
 parameters:
-  - name: cluster_floating_ip
-    label: External IP for SSH access (optional)
-    description: |-
-      Attach an external IP to the workstation for access using SSH.
-    kind: cloud.ip
-    required: true
-    immutable: true
-
   - name: operating_system
     label: "Select operating system"
     description: |-
