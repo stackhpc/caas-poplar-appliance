@@ -13,7 +13,7 @@
 # Brute force approach because allocation might be anywhere
 - name: Try delete partition from user vipu
   ansible.builtin.command:
-    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} remove partition {{ user_partition }}"
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} -i {{ cluster_ssh_private_key_file }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} remove partition {{ user_partition }}"
   when: delete_result.rc|default(1) != 0
   # TODO: look for missing partition?
   ignore_errors: true
@@ -23,7 +23,7 @@
 
 - name: Delete existing allocation from V-IPU prime to free space on update
   ansible.builtin.command:
-    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin remove allocation {{ allocation_name }}"
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} -i {{ cluster_ssh_private_key_file }} vipu-admin remove allocation {{ allocation_name }}"
   register: delete_result
   when: delete_result.rc|default(1) != 0
   ignore_errors: true
@@ -33,7 +33,7 @@
 
 - name: Create the allocation of requested size ipum model
   ansible.builtin.shell: |
-    {{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin create allocation {{allocation_name}} --size {{allocation_size | int}} #{{item}}
+    {{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} -i {{ cluster_ssh_private_key_file }} vipu-admin create allocation {{allocation_name}} --size {{allocation_size | int}} #{{item}}
   register: allocation_result
   ignore_errors: true
   when:
@@ -124,7 +124,7 @@
 
 - name: Get allocation properties
   ansible.builtin.command:
-    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin --showjson get allocation {{ allocation_name }}"
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} -i {{ cluster_ssh_private_key_file }} vipu-admin --showjson get allocation {{ allocation_name }}"
   when: allocation_size | int > 0
   register: assigned_alloc_list
 
@@ -143,7 +143,7 @@
   block:
     - name: Create partition, here we need to act on the vipu-container
       ansible.builtin.command:
-        cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable"
+        cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} -i {{ cluster_ssh_private_key_file }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable"
       register: vipu_part_mk
       ignore_errors: true
 
