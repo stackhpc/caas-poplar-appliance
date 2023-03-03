@@ -100,10 +100,18 @@ parameters:
         - 24
         - 48
 
+  - name: cluster_floating_ip
+    label: External IP for SSH access
+    description: |-
+      Attach an external IP to the workstation for access using SSH.
+    kind: cloud.ip
+    required: false
+    immutable: true
+
 usage_template: |-
   {% set webconsole = cluster | service("webconsole") %}
   {% set monitoring = cluster | service("monitoring") %}
-  This Poplar appliance is configured with {{cluster.outputs.allocation_size}} {{cluster.outputs.ipum_model}} IPUs, {{cluster.outputs.cluster_operating_system}} and flavour {{cluster.outputs.cluster_flavour_name}}. The lifetime is {{cluster.outputs.cluster_lifetime}} hrs, hence automatic deletion is scheduled at {{cluster.outputs.cluster_termination_epoch}}.
+  This Poplar appliance is configured with {{cluster.outputs.allocation_size}} {{cluster.outputs.ipum_model if cluster.outputs.ipum_model != 'none'}} IPUs, {{cluster.outputs.cluster_operating_system}} and flavour {{cluster.outputs.cluster_flavour_name}}. The lifetime is {{cluster.outputs.cluster_lifetime}} hrs, hence automatic deletion is scheduled at {{cluster.outputs.cluster_termination_epoch}}.
 
   You may access the appliance in a web browser via the [Web console service]({{ webconsole.url }}) and by SSH.  The SSH keys used are those in the Graphcore LDAP service. SSH is configured to allow login only by the appliance creator and Cloud Development engineers. Further users may be enabled by adding them to the `ipupod` group. The web console logs in as user `ipuuser` automatically.
 

@@ -13,7 +13,7 @@
 # Brute force approach because allocation might be anywhere
 - name: Try delete partition from user vipu
   ansible.builtin.command:
-    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin -P {{ vipu_container_admin_port }} remove partition {{ user_partition }}"
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} remove partition {{ user_partition }}"
   when: delete_result.rc|default(1) != 0
   # TODO: look for missing partition?
   ignore_errors: true
@@ -39,7 +39,8 @@
   when:
     - allocation_size | int > 0
     - allocation_result.rc|default(1) != 0
-  loop: "{{ (ipum_model == 'any') | ternary( 'classic,bow', ipum_model ) | split(',') }}"
+  loop: "{{ (ipum_model == 'any') | ternary( 'classic,bow', ipum_model ) | split(',')
+    }}"
 
 - name: Debug allocation_result
   ansible.builtin.debug:
@@ -47,13 +48,19 @@
 
 - name: Abort if there simply is not enough space
   ansible.builtin.fail:
-    msg: No {{(ipum_model == 'any') | ternary( 'classic,bow', ipum_model )}} allocations of size {{allocation_size}} available
+    msg: No {{(ipum_model == 'any') | ternary( 'classic,bow', ipum_model )}} allocations
+      of size {{allocation_size}} available
   when:
-    - allocation_result.results | selectattr('stdout', 'defined') | map(attribute='stdout') | regex_search('success') is none
+    - allocation_result.results | selectattr('stdout', 'defined') | map(attribute='stdout')
+      | regex_search('success') is none
+    - allocation_size | int > 0
 
 - name: Work out whether we allocated classic or bow
   ansible.builtin.set_fact:
-    ipum_model_actual: "{{ allocation_result.results | rejectattr('rc', 'undefined')| selectattr('rc', '==', 0) | map(attribute='item')  | first  }}"
+    ipum_model_actual: "{{ allocation_result.results | rejectattr('rc', 'undefined')|
+      selectattr('rc', '==', 0) | map(attribute='item')  | first }}"
+  when:
+    - allocation_size | int > 0
 
 - name: Debug allocation_result
   ansible.builtin.debug:
@@ -63,7 +70,7 @@
 - name: Debug ipum actual name
   ansible.builtin.debug:
     #msg: "Detected IPUM type: {{ipum_model_actual | type_debug}}"
-    msg: "Detected IPUM type: {{ipum_model_actual }}"
+    msg: "Detected IPUM type: {{ipum_model_actual | default('none') }}"
 
 - name: Set clouds.yaml location if missing
   ansible.builtin.set_fact:
@@ -123,7 +130,8 @@
 
 - name: List assigned IPUMs cos we need it for the truffle-shuffle
   ansible.builtin.set_fact:
-    assigned_ipums_list: "{{ assigned_alloc_list.stdout | from_json |  moreati.jq.jq('.allocation.spec.agent_ids') }}"
+    assigned_ipums_list: "{{ assigned_alloc_list.stdout | from_json |  moreati.jq.jq('.allocation.spec.agent_ids')
+      }}"
   when: allocation_size | int > 0
 
 - name: Shuffle IPUMs, need to do this even in the case of allocation_size=0

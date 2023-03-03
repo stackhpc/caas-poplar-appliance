@@ -241,7 +241,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     azimuth_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
     guacamole_user = "ipuuser"
     appliance_type   = "poplar"
-    appliance_pub_ip = "{{ cluster_floating_ip_address | default('') }}"
+    appliance_pub_ip = "{{ cluster_floating_ip_address | default('none') }}"
     allocation_name = "{{ allocation_name }}"
     partition_name  = "{{ user_partition  }}"
 {% if ipum_model_actual is defined and ipum_model_actual %}
