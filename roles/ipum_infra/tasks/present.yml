@@ -93,7 +93,6 @@
   register: ctrl_result
   environment:
     OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
-    OS_CLOUD: "openstack"
 
 # Ensure azimuth-vpod-common-ctrl RBAC policy exists
 - name: Create a new network RBAC policy for common control
