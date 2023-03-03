@@ -11,9 +11,9 @@
 # 4. Create partition, if user requested, in the instance cV-IPU
 
 # Brute force approach because allocation might be anywhere
-- name: Try delete partition from V-IPU prime to free space on update
+- name: Try delete partition from user vipu
   ansible.builtin.command:
-    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin remove partition {{ user_partition }}"
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin -P {{ vipu_container_admin_port }} remove partition {{ user_partition }}"
   when: delete_result.rc|default(1) != 0
   # TODO: look for missing partition?
   ignore_errors: true
