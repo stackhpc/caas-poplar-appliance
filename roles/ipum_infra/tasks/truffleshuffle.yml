@@ -44,15 +44,6 @@
   loop_control:
     loop_var: tf_var
 
-# - name: Make ssh directory
-#   ansible.builtin.file:
-#     path: ~/.ssh
-#     state: directory
-
-# - name: Get GitLab hostkeys
-#   ansible.builtin.shell:
-#     cmd: ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
-
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
     src: "/etc/openstack/clouds.yaml"
@@ -79,7 +70,7 @@
     force_init: yes
     init_reconfigure: yes
   environment:
-    OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+    OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
   register: terraform_provision
 
 - name: Populate facts from Terraform outputs

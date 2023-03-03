@@ -11,9 +11,19 @@
 # 4. Create partition, if user requested, in the instance cV-IPU
 
 # Brute force approach because allocation might be anywhere
+- name: Try delete partition from user vipu
+  ansible.builtin.command:
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin -P {{ vipu_container_admin_port }} remove partition {{ user_partition }}"
+  when: delete_result.rc|default(1) != 0
+  # TODO: look for missing partition?
+  ignore_errors: true
+  loop:
+    - classic
+    - bow
+
 - name: Delete existing allocation from V-IPU prime to free space on update
   ansible.builtin.command:
-    cmd: vipu-admin -H {{ vipu_servers[item]['floating_ip'] }} -P 8091 remove allocation {{allocation_name}}
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin remove allocation {{ allocation_name }}"
   register: delete_result
   when: delete_result.rc|default(1) != 0
   ignore_errors: true
@@ -23,7 +33,7 @@
 
 - name: Create the allocation of requested size ipum model
   ansible.builtin.shell: |
-    vipu-admin -H {{ vipu_servers[item]['floating_ip'] }} -P 8091 create allocation {{allocation_name}} --size {{allocation_size | int}} #{{item}}
+    {{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin create allocation {{allocation_name}} --size {{allocation_size | int}} #{{item}}
   register: allocation_result
   ignore_errors: true
   when:
@@ -55,12 +65,10 @@
     #msg: "Detected IPUM type: {{ipum_model_actual | type_debug}}"
     msg: "Detected IPUM type: {{ipum_model_actual }}"
 
-- name: Copy clouds.yaml file
-  ansible.builtin.copy:
-    decrypt: yes
-    src: "{{playbook_dir}}/files/clouds-{{gc_tenancy | default(gc_cloud)}}.yaml"
-    dest: "/etc/openstack/clouds.yaml"
-    mode: 0666
+- name: Set clouds.yaml location if missing
+  ansible.builtin.set_fact:
+    admin_clouds_yaml: "{{playbook_dir}}/files/clouds-{{gc_tenancy | default(gc_cloud)}}.yaml"
+  when: admin_clouds_yaml is not defined
 
 - name: Get ID of common_ctrl network
   openstack.cloud.networks_info:
@@ -68,10 +76,10 @@
     name: "{{ control_network_name | default('azimuth-vpod-common-ctrl') }}"
   register: ctrl_result
   environment:
-    OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+    OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
 
 # Ensure azimuth-vpod-common-ctrl RBAC policy exists
-- name: Create a new network RBAC policy
+- name: Create a new network RBAC policy for common control
   openstack.cloud.neutron_rbac_policy:
     object_id: "{{ ctrl_result.openstack_networks[0].id}}"
     object_type: "network"
@@ -82,7 +90,7 @@
     state: present
   register: rbac_result
   environment:
-    OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+    OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
 
 - name: Get ID of common_storage network
   openstack.cloud.networks_info:
@@ -90,7 +98,7 @@
     name: "{{ storage_network_name | default('azimuth-vpod-common-storage') }}"
   register: storage_result
   environment:
-    OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+    OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
 
 # Ensure azimuth-vpod-common-storage RBAC policy exists
 - name: Create a new network RBAC policy
@@ -103,11 +111,13 @@
     action: "access_as_shared"
     state: present
   environment:
-    OS_CLIENT_CONFIG_FILE: "/etc/openstack/clouds.yaml"
+    OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
+  # TODO: probably skip this only based on config!
+  when: storage_result.openstack_networks
 
 - name: Get allocation properties
   ansible.builtin.command:
-    cmd: vipu-admin --showjson -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P 8091 get allocation {{allocation_name}}
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin --showjson get allocation {{ allocation_name }}"
   when: allocation_size | int > 0
   register: assigned_alloc_list
 
@@ -125,7 +135,7 @@
   block:
     - name: Create partition, here we need to act on the vipu-container
       ansible.builtin.command:
-        cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P {{ vipu_container_admin_port }} --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable
+        cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} --showjson create partition {{user_partition}} --size {{allocation_size | int}} --allocation {{allocation_name}} --reconfigurable"
       register: vipu_part_mk
       ignore_errors: true
 
@@ -137,8 +147,3 @@
   when:
     - '"Single reconfigurable partition" in partition_choice'
     - allocation_size | int > 0
-
-- name: Remove clouds.yaml file so next task runs as the Azimuth user
-  ansible.builtin.file:
-    state: absent
-    path: "/etc/openstack/clouds.yaml"

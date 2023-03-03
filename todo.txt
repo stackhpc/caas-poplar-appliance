@@ -1,0 +1,21 @@
+make old awx work with my changes:
+* (done) review with james the new ssh into bow + classic (and vipu ip)
+* (done) reivew floating ip
+* restore awx bit, gut make them skip
+* restore legacy clouds.yaml when extra_var not set
+* fix up optional storage network
+
+next steps:
+* option for image uuids, like other appliances
+* add wait for zenith service
+* remove references to gbnwp_cl1, and groupvars (fix ipum ips?)
+* implement auto delete with CRD operator?
+
+* auto get the 10.5.x.x IP from this info:
+
+$ vipu-admin get agent lr75-ipum1 --showjson
+{
+        "agent": {
+                "id": "lr75-ipum1",
+                "spec": {
+                        "host": "10.2.75.1",

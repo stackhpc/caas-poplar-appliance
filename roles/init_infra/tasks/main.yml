@@ -34,6 +34,10 @@
   loop_control:
     loop_var: var_inc_var
 
+- name: sanitise the cluster_id
+  ansible.builtin.set_fact:
+    cluster_id_safe: "{{ cluster_id | replace('-','') | int(base=16) }}"
+
 - name: Set various facts
   ansible.builtin.set_fact:
     appliance_user: "{{ (openstack_cli_user.stdout | split('@') | first | lower) if
@@ -42,152 +46,35 @@
     appliance_tenancy: "{{ openstack_cli_tenancy_name.stdout | default( 'ipuops')
       }}"
     appcred_name: "{{ cluster_name }}_{{ cluster_id }}"
-    vipu_container_user_port: "{{ ((cluster_id | int * 10) % 32768) + azimuth_vipu_base_port
+    vipu_container_user_port: "{{ ((cluster_id_safe | int * 10) % 32768) + azimuth_vipu_base_port
       | int }}"
-    vipu_container_admin_port: "{{ (((cluster_id | int * 10) + 1) % 32768) + azimuth_vipu_base_port
+    vipu_container_admin_port: "{{ (((cluster_id_safe | int * 10) + 1) % 32768) + azimuth_vipu_base_port
       | int }}"
-    vipu_container_exporter_port: "{{ (((cluster_id | int * 10) + 2) % 32768) + azimuth_vipu_base_port
+    vipu_container_exporter_port: "{{ (((cluster_id_safe | int * 10) + 2) % 32768) + azimuth_vipu_base_port
       | int }}"
 
 - name: Set allocation name
   ansible.builtin.set_fact:
-    allocation_name: "{{cluster_id}}-{{appliance_user}}-{{cluster_name}}"
+    allocation_name: "{{cluster_id_safe}}-{{appliance_user}}-{{cluster_name}}"
 
 - name: Set partition name
   ansible.builtin.set_fact:
     user_partition: "{{allocation_name}}-reconfig"
 
-- name: Log some more useful information
-  ansible.builtin.debug:
-    msg: "Application credential name: {{ appcred_name }} for user {{appliance_user}}"
-
-- name: Test if the appliance is already created (using AppCred as flag)
-  block:
-    - name: Try to get the AWX credential
-      local_action:
-        module: awx.awx.export
-        credentials: "{{ appcred_name }}"
-        controller_host: "{{ controller_host }}"
-        controller_oauthtoken: "{{ controller_oauthtoken }}"
-        controller_username: "{{ controller_username }}"
-        validate_certs: no
-      register: existing_credential
-      failed_when: "existing_credential.assets.credentials | length != 1"
-
-    - name: Get the appliance deletion epoch from the AppCred
-      ansible.builtin.set_fact:
-        appliance_deletion_epoch: "{{ existing_credential.assets.credentials[0].inputs.application_credential_expiry}}"
-
-    - name: Appliance already exists
-      ansible.builtin.set_fact:
-        appliance_state: update
-  rescue:
-    - name: Appliance is being created for first time
-      ansible.builtin.set_fact:
-        appliance_state: create
-
-    - name: Calculate expiration time from now + lifetime + 1 hr
-      ansible.builtin.shell:
-        cmd: date -d '{{ (appliance_lifetime_hrs | int + 1) * 60 }} mins' +'%FT%T'
-          -u
-      register: appcred_expiry_result
-      when:
-        - appliance_lifetime_hrs is defined
-        - not appliance_lifetime_hrs is search("never")
-
-    - name: Calculate deletion time from now + lifetime
-      ansible.builtin.shell:
-        cmd: date -d '{{ appliance_lifetime_hrs | int * 60 }} mins' +'%F %T' -u
-      register: appliance_deletion_result
-      when:
-        - appliance_lifetime_hrs is defined
-        - not appliance_lifetime_hrs is search("never")
-
-    - name: Set time facts during creation
-      ansible.builtin.set_fact:
-        appcred_expiry_epoch: "{{ appcred_expiry_result.stdout is defined | ternary(appcred_expiry_result.stdout,
-          'never') }}"
-        appliance_deletion_epoch: "{{ appliance_deletion_result.stdout is defined
-          | ternary(appliance_deletion_result.stdout, 'never') }}"
-        schedule_rrule: "{{ query('awx.awx.schedule_rrule', 'none', start_date=''
-          + appliance_deletion_result.stdout is defined | ternary(appliance_deletion_result.stdout,'1969-07-21
-          02:56:56') + '', timezone='UTC') }}"
-
-- name: Create long-lived AppCred for user
+# TODO: get CRD to inject its calcuated delete time
+- name: Calculate deletion time from now + lifetime
+  ansible.builtin.shell:
+    cmd: date -d '{{ appliance_lifetime_hrs | int * 60 }} mins' +'%F %T' -u
+  register: appliance_deletion_result
   when:
-    - not terraform_state is search("absent")
-    - appliance_state is search("create")
-  block:
-    #TODO: consider making AppCred name more unique (OpenStack complains)
-    - name: Test getting user AppCred
-      ansible.builtin.shell:
-        cmd: openstack application credential create -f yaml --expiration {{appcred_expiry_epoch}}
-          {{appcred_name}}
-      register: user_appcred_req
-      when: not appliance_deletion_epoch is search("never")
+    - appliance_deletion_epoch is not defined
+    - appliance_lifetime_hrs is defined
+    - not appliance_lifetime_hrs is search("never")
 
-    - name: Convert AppCred to YAML
-      ansible.builtin.set_fact:
-        user_appcred: "{{ user_appcred_req.stdout | from_yaml }}"
-      when: not appliance_deletion_epoch is search("never")
+- name: Set time facts during creation
+  ansible.builtin.set_fact:
+    appliance_deletion_epoch: "{{ appliance_deletion_result.stdout is defined | ternary(appliance_deletion_result.stdout, 'never') }}"
 
-    - name: Create AWX credential
-      local_action:
-        module: awx.awx.credential
-        name: "{{ appcred_name }}"
-        description: AppCred for {{ appliance_user }}
-        state: present
-        user: admin
-        credential_type: OpenStack AppCred
-        inputs:
-          auth_url: "{{ auth_url }}"
-          application_credential_id: "{{ user_appcred.id if user_appcred is defined
-            else 'dummy' }}"
-          application_credential_secret: "{{ user_appcred.secret if user_appcred is
-            defined else 'dummy' }}"
-          application_credential_expiry: "{{ appliance_deletion_epoch }}"
-        controller_host: "{{ controller_host }}"
-        controller_oauthtoken: "{{ controller_oauthtoken }}"
-        controller_username: "{{ controller_username }}"
-        validate_certs: no
-
-- name: Schedule appliance deletion
-  when:
-    - not terraform_state is search("absent")
-    - appliance_state is search("create")
-    - not appliance_deletion_epoch is search("never")
-  block:
-    - name: Schedule appliance deletion
-      local_action:
-        module: awx.awx.schedule
-        name: "{{ allocation_name }}"
-        description: "Schedule created by Ansible"
-        state: present
-        inventory: "{{ appliance_tenancy }}-{{ cluster_name }}"
-        unified_job_template: poplar-appliance
-        credentials:
-          - "{{ appcred_name }}"
-        extra_data:
-          cluster_state: absent
-        rrule: "{{ schedule_rrule }}"
-        enabled: true
-        controller_host: "{{ controller_host }}"
-        controller_oauthtoken: "{{ controller_oauthtoken }}"
-        controller_username: "{{ controller_username }}"
-        validate_certs: no
-
-- name: Appliance clean-up, remove schedule
-  when:
-    - terraform_state is search("absent")
-    - not appliance_deletion_epoch is search("never")
-  block:
-    - name: Remove appliance schedule
-      local_action:
-        module: awx.awx.schedule
-        name: "{{ allocation_name }}"
-        state: absent
-        inventory: "{{ appliance_tenancy }}-{{ cluster_name }}"
-        controller_host: "{{ controller_host }}"
-        controller_oauthtoken: "{{ controller_oauthtoken }}"
-        controller_username: "{{ controller_username }}"
-        validate_certs: no
+- name: Import tasks for awx, when required
+  ansible.builtin.import_tasks: awx.yml
+  when: awx_skip is not defined

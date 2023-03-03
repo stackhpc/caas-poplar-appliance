@@ -9,4 +9,4 @@ collections:
   - name: moreati.jq
     version: 0.2.1
   - name: awx.awx
-    version: ">=21.10.2"
+    version: 21.10.2

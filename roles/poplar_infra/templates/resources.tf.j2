@@ -105,6 +105,7 @@ resource "openstack_networking_port_v2" "ctrl" {
   security_group_ids = [ openstack_networking_secgroup_v2.poplar_secgroup.id, data.openstack_networking_secgroup_v2.vipu_secgroup.id ]
 }
 
+{% if storage_network_name is defined %}
 ##
 # This block brings up the storage network interface
 #
@@ -127,16 +128,17 @@ resource "openstack_networking_port_v2" "stor" {
   #port_security_enabled = "true"
   #security_group_ids = [ openstack_networking_secgroup_v2.cluster_secgroup.id ]
 }
+{% endif %}
 
-
+{% if cluster_floating_ip_address is defined and cluster_floating_ip_address %}
 ##
 # This block allocates a public floating IP to the appliance
 #
-resource "openstack_networking_floatingip_v2" "app-fip" {
-  pool = "external"
+resource "openstack_networking_floatingip_associate_v2" "app-fip" {
+  floating_ip = "{{ cluster_floating_ip_address }}"
   port_id = "${openstack_networking_port_v2.ctrl.id}"
 }
-
+{% endif %}
 
 #####
 ##### Cluster nodes
@@ -177,6 +179,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
           [DHCPv4]
           UseDNS=false
 {% endif %}
+{% if storage_network_name is defined %}
       - path: /etc/systemd/network/07-stor.network
         content: |
           [Match]
@@ -185,6 +188,7 @@ resource "openstack_compute_instance_v2" "cluster_server" {
           DHCP=yes
           [DHCPv4]
           UseDNS=false
+{% endif %}
       - path: /etc/motd
         content: |
            ##############################################################################
@@ -237,11 +241,11 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     azimuth_project_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
     guacamole_user = "ipuuser"
     appliance_type   = "poplar"
-    appliance_pub_ip = "${openstack_networking_floatingip_v2.app-fip.address}"
+    appliance_pub_ip = "{{ cluster_floating_ip_address | default('') }}"
     allocation_name = "{{ allocation_name }}"
     partition_name  = "{{ user_partition  }}"
 {% if ipum_model_actual is defined and ipum_model_actual %}
-    vipu_ipaddr     = "{{ vipu_servers[ipum_model_actual]['ctrl_net_ip'] }}" 
+    vipu_ipaddr     = "{{ lookup('ansible.builtin.vars', 'vipu_server_ip_' + ipum_model_actual) }}"
     vipu_port       = "{{ vipu_container_user_port }}"
 {% endif %}
     ldap_auth_token = "{{ ldap_auth_token }}"
@@ -273,9 +277,11 @@ resource "openstack_compute_instance_v2" "cluster_server" {
     port = "${openstack_networking_port_v2.ctrl.id}"
   }
 
+{% if storage_network_name is defined %}
   network {
     port = "${openstack_networking_port_v2.stor.id}"
   }
+{% endif %}
 }
 
 resource "openstack_compute_volume_attach_v2" "zenith_volume" {

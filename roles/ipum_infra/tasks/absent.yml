@@ -2,8 +2,9 @@
 # Appliance is torn down (terraform_state == absent)
 
 - name: If ipum_model is 'meh' we need to find if we're on bow or classic
+  # TODO: we need to lookup the correct vipu_server here?
   ansible.builtin.shell: |
-    vipu-admin -H {{ vipu_servers[item]['floating_ip'] }} -P 8091 get allocation {{allocation_name}} #{{item}}
+    {{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + item) }} vipu-admin get allocation {{allocation_name}} #{{item}}
   register: ipum_model_scan
   when: ipum_model_scan.rc|default(1) != 0
   ignore_errors: true
@@ -26,7 +27,8 @@
 # check the error condition before trying to execute the following block.
 - name: List partitions in our allocation (only)
   ansible.builtin.command:
-    cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P {{ vipu_container_admin_port }} list partitions --allocation {{allocation_name}} --showjson
+    # TODO: use ipum_model_actual to lookup which vipu_server_ssh to use? or have two appliances?
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} list partitions --allocation {{allocation_name}} --showjson"
   when:
     - allocation_size | int > 0
     - not ipum_model_actual is search('any')
@@ -41,7 +43,7 @@
 
     - name: Remove partitions in our allocation
       ansible.builtin.command:
-        cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P {{ vipu_container_admin_port }} remove partition {{ part_var }} --force
+        cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin -H localhost -P {{ vipu_container_admin_port }} remove partition {{ part_var }} --force"
       loop: "{{ vipu_partition_list if vipu_partition_list else [] }}"
       loop_control:
         loop_var: part_var
@@ -56,10 +58,8 @@
 
 - name: List allocation - the return code shows if the expected alloc exists
   ansible.builtin.command:
-    cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P 8091 --showjson get allocation {{allocation_name}}
-  when:
-    - allocation_size | int > 0
-    - not ipum_model_actual is search('any')
+    cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin --showjson get allocation {{allocation_name}}"
+  when: allocation_size | int > 0
   register: vipu_alloc_list
   ignore_errors: true
 
@@ -72,27 +72,19 @@
 
     - name: Remove allocation
       ansible.builtin.command:
-        cmd: vipu-admin -H {{ vipu_servers[ipum_model_actual]['floating_ip'] }} -P 8091 remove allocation {{ allocation_name }}
+        cmd: "{{ lookup('ansible.builtin.vars', 'vipu_server_ssh_' + ipum_model_actual) }} vipu-admin remove allocation {{ allocation_name }}"
       register: allocation_remove_out
-
-    - name: Copy clouds.yaml file
-      ansible.builtin.copy:
-        decrypt: yes
-        src: "{{playbook_dir}}/files/clouds-{{gc_tenancy | default(gc_cloud)}}.yaml"
-        dest: "/etc/openstack/clouds.yaml"
-        mode: 0666
+      # Don't fail if the allocation was never created due to lack of space
+      failed_when: "allocation_remove_out.rc != 0 and 'is unknown' not in allocation_remove_out.stderr"
 
     # Remove the IPUMs in assigned_ipums_list from the user's vpod
     - name: Shuffle IPUMs back to staging
       ansible.builtin.include_role:
         name: ipum_infra
         tasks_from: truffleshuffle.yml
-
-    - name: Remove clouds.yaml file so next play runs as the Azimuth user
-      ansible.builtin.file:
-        state: absent
-        path: "/etc/openstack/clouds.yaml"
-        # End block cleaning up allocations
+      # if we don't have assigned_ipums_list then we don't have IPUMs
+      # TODO: ideally we can detect if there are instances and error out?
+      when: assigned_ipums_list is defined
   when:
     - allocation_size | int > 0
     - vipu_alloc_list.rc is defined and vipu_alloc_list.rc == 0
