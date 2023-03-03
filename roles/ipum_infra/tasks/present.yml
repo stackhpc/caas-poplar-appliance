@@ -72,9 +72,18 @@
     #msg: "Detected IPUM type: {{ipum_model_actual | type_debug}}"
     msg: "Detected IPUM type: {{ipum_model_actual | default('none') }}"
 
+
+- name: decrypt clouds.yaml
+  ansible.builtin.copy:
+    decrypt: yes
+    src: "{{playbook_dir}}/files/clouds-{{gc_tenancy | default(gc_cloud)}}.yaml"
+    dest: "/tmp/{{ gc_cloud }}.yaml"
+    mode: 0666
+  when: admin_clouds_yaml is not defined
+
 - name: Set clouds.yaml location if missing
   ansible.builtin.set_fact:
-    admin_clouds_yaml: "{{playbook_dir}}/files/clouds-{{gc_tenancy | default(gc_cloud)}}.yaml"
+    admin_clouds_yaml: "/tmp/{{ gc_cloud }}.yaml"
   when: admin_clouds_yaml is not defined
 
 - name: Get ID of common_ctrl network
@@ -84,6 +93,7 @@
   register: ctrl_result
   environment:
     OS_CLIENT_CONFIG_FILE: "{{ admin_clouds_yaml }}"
+    OS_CLOUD: "openstack"
 
 # Ensure azimuth-vpod-common-ctrl RBAC policy exists
 - name: Create a new network RBAC policy for common control
