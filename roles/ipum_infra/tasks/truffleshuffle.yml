@@ -44,6 +44,21 @@
   loop_control:
     loop_var: tf_var
 
+# fetch gitlab keys for terraform module
+# ... but only when running with axw as
+# these directories are not writable in
+# CRD, they are injected via a k8s secret
+- name: Make ssh directory
+  ansible.builtin.file:
+    path: ~/.ssh
+    state: directory
+  when: awx_skip is not defined
+
+- name: Get GitLab hostkeys
+  ansible.builtin.shell:
+    cmd: ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+  when: awx_skip is not defined
+
 - name: Get clouds.yaml file for debug
   ansible.builtin.slurp:
     src: "/etc/openstack/clouds.yaml"
